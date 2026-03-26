@@ -19,6 +19,113 @@
           "name": "Pipeline Bot",
           "creature": "robot"
         }
+      },
+      {
+        "id": "pm",
+        "name": "Product Manager",
+        "default": false,
+        "workspace": "/path/to/ai-pipeline",
+        "model": {
+          "id": "gpt-4o"
+        },
+        "systemPrompt": "prompts/pm.md",
+        "identity": {
+          "name": "PM Agent",
+          "creature": "clipboard"
+        }
+      },
+      {
+        "id": "architect",
+        "name": "Architect",
+        "default": false,
+        "workspace": "/path/to/ai-pipeline",
+        "model": {
+          "id": "gpt-4o"
+        },
+        "systemPrompt": "prompts/architect.md",
+        "identity": {
+          "name": "Architect Agent",
+          "creature": "building"
+        }
+      },
+      {
+        "id": "developer",
+        "name": "Developer",
+        "default": false,
+        "workspace": "/path/to/ai-pipeline",
+        "model": {
+          "id": "gpt-4o"
+        },
+        "systemPrompt": "prompts/developer.md",
+        "tools": {
+          "alsoAllow": ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
+        },
+        "identity": {
+          "name": "Developer Agent",
+          "creature": "keyboard"
+        }
+      },
+      {
+        "id": "reviewer",
+        "name": "Reviewer",
+        "default": false,
+        "workspace": "/path/to/ai-pipeline",
+        "model": {
+          "id": "gpt-4o"
+        },
+        "systemPrompt": "prompts/reviewer.md",
+        "identity": {
+          "name": "Reviewer Agent",
+          "creature": "magnifying_glass"
+        }
+      },
+      {
+        "id": "qa",
+        "name": "QA Engineer",
+        "default": false,
+        "workspace": "/path/to/ai-pipeline",
+        "model": {
+          "id": "gpt-4o"
+        },
+        "systemPrompt": "prompts/qa.md",
+        "tools": {
+          "alsoAllow": ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
+        },
+        "identity": {
+          "name": "QA Agent",
+          "creature": "test_tube"
+        }
+      },
+      {
+        "id": "release",
+        "name": "Release Engineer",
+        "default": false,
+        "workspace": "/path/to/ai-pipeline",
+        "model": {
+          "id": "gpt-4o"
+        },
+        "systemPrompt": "prompts/release.md",
+        "tools": {
+          "alsoAllow": ["Read", "Bash", "Glob", "Grep"]
+        },
+        "identity": {
+          "name": "Release Agent",
+          "creature": "rocket"
+        }
+      },
+      {
+        "id": "triage",
+        "name": "Bug Triage",
+        "default": false,
+        "workspace": "/path/to/ai-pipeline",
+        "model": {
+          "id": "gpt-4o"
+        },
+        "systemPrompt": "prompts/triage.md",
+        "identity": {
+          "name": "Triage Agent",
+          "creature": "bug"
+        }
       }
     ]
   },
@@ -30,6 +137,62 @@
         "channel": "discord",
         "guildId": "YOUR_GUILD_ID",
         "channelId": "PIPELINE_REQUESTS_CHANNEL_ID"
+      }
+    },
+    {
+      "agentId": "pm",
+      "match": {
+        "channel": "discord",
+        "guildId": "YOUR_GUILD_ID",
+        "channelId": "PRODUCT_CHANNEL_ID"
+      }
+    },
+    {
+      "agentId": "architect",
+      "match": {
+        "channel": "discord",
+        "guildId": "YOUR_GUILD_ID",
+        "channelId": "DESIGN_CHANNEL_ID"
+      }
+    },
+    {
+      "agentId": "developer",
+      "match": {
+        "channel": "discord",
+        "guildId": "YOUR_GUILD_ID",
+        "channelId": "DEV_CHANNEL_ID"
+      }
+    },
+    {
+      "agentId": "reviewer",
+      "match": {
+        "channel": "discord",
+        "guildId": "YOUR_GUILD_ID",
+        "channelId": "DEV_CHANNEL_ID"
+      }
+    },
+    {
+      "agentId": "qa",
+      "match": {
+        "channel": "discord",
+        "guildId": "YOUR_GUILD_ID",
+        "channelId": "QA_CHANNEL_ID"
+      }
+    },
+    {
+      "agentId": "release",
+      "match": {
+        "channel": "discord",
+        "guildId": "YOUR_GUILD_ID",
+        "channelId": "RELEASE_CHANNEL_ID"
+      }
+    },
+    {
+      "agentId": "triage",
+      "match": {
+        "channel": "discord",
+        "guildId": "YOUR_GUILD_ID",
+        "channelId": "BUGS_CHANNEL_ID"
       }
     }
   ],
@@ -45,13 +208,29 @@
               "allow": true,
               "_comment": "#pipeline-requests — users trigger workflows here"
             },
-            "PIPELINE_STATUS_CHANNEL_ID": {
+            "PRODUCT_CHANNEL_ID": {
               "allow": true,
-              "_comment": "#pipeline-status — bot posts progress updates"
+              "_comment": "#product — PM agent, PRD discussions"
             },
-            "PIPELINE_APPROVALS_CHANNEL_ID": {
+            "DESIGN_CHANNEL_ID": {
               "allow": true,
-              "_comment": "#pipeline-approvals — approval gate prompts"
+              "_comment": "#design — architect agent, technical design"
+            },
+            "DEV_CHANNEL_ID": {
+              "allow": true,
+              "_comment": "#dev — developer + reviewer agents, code + code review"
+            },
+            "QA_CHANNEL_ID": {
+              "allow": true,
+              "_comment": "#qa — QA agent, test results"
+            },
+            "RELEASE_CHANNEL_ID": {
+              "allow": true,
+              "_comment": "#release — release agent, deployment status"
+            },
+            "BUGS_CHANNEL_ID": {
+              "allow": true,
+              "_comment": "#bugs — triage agent, bug reports and analysis"
             }
           }
         }

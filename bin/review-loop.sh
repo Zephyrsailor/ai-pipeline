@@ -50,7 +50,7 @@ Output ONLY a JSON object:
   if [ "$round" -lt "$MAX_ROUNDS" ]; then
     echo "=== Fixing issues (attempt $round) ===" >&2
     claude --print \
-      --system-prompt "$(cat "$SCRIPT_DIR/prompts/programmer.md")" \
+      --system-prompt "$(cat "$SCRIPT_DIR/prompts/developer.md")" \
       --prompt "Fix these code review issues found in the repo:
 
 $last_issues

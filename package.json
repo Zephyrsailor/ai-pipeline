@@ -1,13 +1,13 @@
 {
   "name": "ai-pipeline",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "AI R&D pipeline: OpenClaw + Lobster + Discord",
   "scripts": {
     "poc": "node ../../../lab/lobster/bin/lobster.js run --file workflows/poc.lobster",
     "poc:tool": "node ../../../lab/lobster/bin/lobster.js run --mode tool --file workflows/poc.lobster",
-    "feature": "node ../../../lab/lobster/bin/lobster.js run --mode tool --file workflows/feature.lobster",
+    "product-dev": "node ../../../lab/lobster/bin/lobster.js run --mode tool --file workflows/product-dev.lobster",
     "bugfix": "node ../../../lab/lobster/bin/lobster.js run --mode tool --file workflows/bugfix.lobster",
     "resume": "node ../../../lab/lobster/bin/lobster.js resume"
   }

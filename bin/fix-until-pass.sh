@@ -38,7 +38,7 @@ Try a different approach. Fix plan: $fix_plan"
   fi
 
   claude --print \
-    --system-prompt "$(cat "$SCRIPT_DIR/prompts/programmer.md")" \
+    --system-prompt "$(cat "$SCRIPT_DIR/prompts/developer.md")" \
     --prompt "$fix_prompt" \
     --cwd "$REPO" \
     --allowedTools "Read,Write,Edit,Bash,Glob,Grep" \
@@ -46,7 +46,7 @@ Try a different approach. Fix plan: $fix_plan"
 
   # Step 2: Run tests
   echo "=== Running tests (attempt $attempt) ===" >&2
-  if test_output=$("$SCRIPT_DIR/bin/run-tests.sh" 2>&1); then
+  if test_output=$(REPO="$REPO" "$SCRIPT_DIR/bin/test.sh" <<< "$TRIAGE_CONTEXT" 2>&1); then
     tests_passed=true
     echo "=== Tests PASSED at attempt $attempt ===" >&2
     break
