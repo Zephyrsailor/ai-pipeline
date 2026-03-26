@@ -1,0 +1,69 @@
+{
+  "_comment": "OpenClaw configuration snippet — merge into ~/.openclaw/openclaw.json on edgexpert-3cd2",
+
+  "agents": {
+    "list": [
+      {
+        "id": "pipeline",
+        "name": "Pipeline",
+        "default": false,
+        "workspace": "/path/to/ai-pipeline",
+        "model": {
+          "id": "claude-sonnet-4-6"
+        },
+        "skills": ["lobster"],
+        "tools": {
+          "alsoAllow": ["lobster", "exec"]
+        },
+        "identity": {
+          "name": "Pipeline Bot",
+          "creature": "robot"
+        }
+      }
+    ]
+  },
+
+  "bindings": [
+    {
+      "agentId": "pipeline",
+      "match": {
+        "channel": "discord",
+        "guildId": "YOUR_GUILD_ID",
+        "channelId": "PIPELINE_REQUESTS_CHANNEL_ID"
+      }
+    }
+  ],
+
+  "channels": {
+    "discord": {
+      "enabled": true,
+      "guilds": {
+        "YOUR_GUILD_ID": {
+          "requireMention": false,
+          "channels": {
+            "PIPELINE_REQUESTS_CHANNEL_ID": {
+              "allow": true,
+              "_comment": "#pipeline-requests — users trigger workflows here"
+            },
+            "PIPELINE_STATUS_CHANNEL_ID": {
+              "allow": true,
+              "_comment": "#pipeline-status — bot posts progress updates"
+            },
+            "PIPELINE_APPROVALS_CHANNEL_ID": {
+              "allow": true,
+              "_comment": "#pipeline-approvals — approval gate prompts"
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "plugins": {
+    "entries": {
+      "lobster": {
+        "enabled": true
+      }
+    }
+  }
+}
