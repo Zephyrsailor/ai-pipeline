@@ -1,0 +1,10 @@
+{
+  "id": "02-design",
+  "from_phase": "design",
+  "to_phase": "development",
+  "artifact": "docs/tech-design.md",
+  "summary": "技术设计完成\n",
+  "requested_by": {"id": "1211241185893421117", "name": "Zephyr", "channel": "discord"},
+  "approved_by": {"id": "1211241185893421117", "name": "Zephyr", "channel": "discord"},
+  "created_at": "2026-03-26T14:23:17Z"
+}
