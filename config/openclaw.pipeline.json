@@ -1,15 +1,15 @@
 {
-  "_comment": "OpenClaw configuration snippet — merge into ~/.openclaw/openclaw.json on edgexpert-3cd2",
+  "_comment": "OpenClaw configuration — merge into ~/.openclaw/openclaw.json",
 
   "agents": {
     "list": [
       {
         "id": "pipeline",
         "name": "Pipeline",
-        "default": false,
-        "workspace": "/path/to/ai-pipeline",
+        "default": true,
+        "workspace": "/Users/zephyr/Desktop/lab/deep-research/ai-pipeline",
         "model": {
-          "id": "claude-sonnet-4-6"
+          "id": "gpt-4o"
         },
         "skills": ["lobster"],
         "tools": {
@@ -24,7 +24,7 @@
         "id": "pm",
         "name": "Product Manager",
         "default": false,
-        "workspace": "/path/to/ai-pipeline",
+        "workspace": "/Users/zephyr/Desktop/lab/deep-research/ai-pipeline",
         "model": {
           "id": "gpt-4o"
         },
@@ -38,7 +38,7 @@
         "id": "architect",
         "name": "Architect",
         "default": false,
-        "workspace": "/path/to/ai-pipeline",
+        "workspace": "/Users/zephyr/Desktop/lab/deep-research/ai-pipeline",
         "model": {
           "id": "gpt-4o"
         },
@@ -52,7 +52,7 @@
         "id": "developer",
         "name": "Developer",
         "default": false,
-        "workspace": "/path/to/ai-pipeline",
+        "workspace": "/Users/zephyr/Desktop/lab/deep-research/ai-pipeline",
         "model": {
           "id": "gpt-4o"
         },
@@ -69,7 +69,7 @@
         "id": "reviewer",
         "name": "Reviewer",
         "default": false,
-        "workspace": "/path/to/ai-pipeline",
+        "workspace": "/Users/zephyr/Desktop/lab/deep-research/ai-pipeline",
         "model": {
           "id": "gpt-4o"
         },
@@ -83,7 +83,7 @@
         "id": "qa",
         "name": "QA Engineer",
         "default": false,
-        "workspace": "/path/to/ai-pipeline",
+        "workspace": "/Users/zephyr/Desktop/lab/deep-research/ai-pipeline",
         "model": {
           "id": "gpt-4o"
         },
@@ -100,7 +100,7 @@
         "id": "release",
         "name": "Release Engineer",
         "default": false,
-        "workspace": "/path/to/ai-pipeline",
+        "workspace": "/Users/zephyr/Desktop/lab/deep-research/ai-pipeline",
         "model": {
           "id": "gpt-4o"
         },
@@ -117,7 +117,7 @@
         "id": "triage",
         "name": "Bug Triage",
         "default": false,
-        "workspace": "/path/to/ai-pipeline",
+        "workspace": "/Users/zephyr/Desktop/lab/deep-research/ai-pipeline",
         "model": {
           "id": "gpt-4o"
         },
@@ -132,67 +132,59 @@
 
   "bindings": [
     {
-      "agentId": "pipeline",
-      "match": {
-        "channel": "discord",
-        "guildId": "YOUR_GUILD_ID",
-        "channelId": "PIPELINE_REQUESTS_CHANNEL_ID"
-      }
-    },
-    {
       "agentId": "pm",
       "match": {
         "channel": "discord",
-        "guildId": "YOUR_GUILD_ID",
-        "channelId": "PRODUCT_CHANNEL_ID"
+        "guildId": "1486608599839932519",
+        "channelId": "1486613586229854278"
       }
     },
     {
       "agentId": "architect",
       "match": {
         "channel": "discord",
-        "guildId": "YOUR_GUILD_ID",
-        "channelId": "DESIGN_CHANNEL_ID"
+        "guildId": "1486608599839932519",
+        "channelId": "1486613609839726736"
       }
     },
     {
       "agentId": "developer",
       "match": {
         "channel": "discord",
-        "guildId": "YOUR_GUILD_ID",
-        "channelId": "DEV_CHANNEL_ID"
+        "guildId": "1486608599839932519",
+        "channelId": "1486613643851202743"
       }
     },
     {
       "agentId": "reviewer",
       "match": {
         "channel": "discord",
-        "guildId": "YOUR_GUILD_ID",
-        "channelId": "DEV_CHANNEL_ID"
+        "guildId": "1486608599839932519",
+        "channelId": "1486613643851202743"
       }
     },
     {
       "agentId": "qa",
       "match": {
         "channel": "discord",
-        "guildId": "YOUR_GUILD_ID",
-        "channelId": "QA_CHANNEL_ID"
-      }
-    },
-    {
-      "agentId": "release",
-      "match": {
-        "channel": "discord",
-        "guildId": "YOUR_GUILD_ID",
-        "channelId": "RELEASE_CHANNEL_ID"
+        "guildId": "1486608599839932519",
+        "channelId": "1486613658984517683"
       }
     },
     {
       "agentId": "triage",
       "match": {
         "channel": "discord",
-        "guildId": "YOUR_GUILD_ID",
-        "channelId": "BUGS_CHANNEL_ID"
+        "guildId": "1486608599839932519",
+        "channelId": "1486613696510693439"
+      }
+    },
+    {
+      "agentId": "release",
+      "match": {
+        "channel": "discord",
+        "guildId": "1486608599839932519",
+        "channelId": "1486613723241123900"
       }
     }
   ],
@@ -201,36 +193,36 @@
     "discord": {
       "enabled": true,
       "guilds": {
-        "YOUR_GUILD_ID": {
+        "1486608599839932519": {
           "requireMention": false,
           "channels": {
-            "PIPELINE_REQUESTS_CHANNEL_ID": {
+            "1486613586229854278": {
               "allow": true,
-              "_comment": "#pipeline-requests — users trigger workflows here"
+              "_comment": "#product"
             },
-            "PRODUCT_CHANNEL_ID": {
+            "1486613609839726736": {
               "allow": true,
-              "_comment": "#product — PM agent, PRD discussions"
+              "_comment": "#design"
             },
-            "DESIGN_CHANNEL_ID": {
+            "1486613643851202743": {
               "allow": true,
-              "_comment": "#design — architect agent, technical design"
+              "_comment": "#dev"
             },
-            "DEV_CHANNEL_ID": {
+            "1486613658984517683": {
               "allow": true,
-              "_comment": "#dev — developer + reviewer agents, code + code review"
+              "_comment": "#qa"
             },
-            "QA_CHANNEL_ID": {
+            "1486613696510693439": {
               "allow": true,
-              "_comment": "#qa — QA agent, test results"
+              "_comment": "#bugs"
             },
-            "RELEASE_CHANNEL_ID": {
+            "1486613723241123900": {
               "allow": true,
-              "_comment": "#release — release agent, deployment status"
+              "_comment": "#release"
             },
-            "BUGS_CHANNEL_ID": {
+            "1486613751800271048": {
               "allow": true,
-              "_comment": "#bugs — triage agent, bug reports and analysis"
+              "_comment": "#dashboard"
             }
           }
         }

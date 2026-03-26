@@ -3,3 +3,9 @@ data/metrics.tsv
 *.log
 .DS_Store
 /tmp/
+*.png
+.openclaw/agents/*/agent/auth-profiles.json
+.openclaw/agents/*/agent/models.json
+.openclaw/workspace-state.json
+workspaces/*/.openclaw/
+.playwright-mcp/
