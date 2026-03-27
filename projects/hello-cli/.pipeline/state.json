@@ -1,7 +1,7 @@
 {
   "project": "hello-cli",
   "created_at": "2026-03-27T21:15:49Z",
-  "current_phase": "design",
+  "current_phase": "development",
   "created_by": null,
   "approvers": {},
   "threads": {
@@ -25,12 +25,19 @@
       }
     },
     "design": {
-      "status": "in_progress",
+      "status": "completed",
       "approval": null,
-      "started_at": "2026-03-27T21:16:16Z"
+      "started_at": "2026-03-27T21:16:16Z",
+      "completed_at": "2026-03-27T21:19:33Z",
+      "approved_by": {
+        "id": "1211241185893421117",
+        "name": "Zephyr",
+        "channel": "discord"
+      }
     },
     "development": {
-      "status": "pending"
+      "status": "in_progress",
+      "started_at": "2026-03-27T21:19:33Z"
     },
     "testing": {
       "status": "pending",
@@ -40,5 +47,6 @@
       "status": "pending",
       "approval": null
     }
-  }
+  },
+  "repo_url": "https://github.com/Zephyrsailor/hello-cli"
 }
