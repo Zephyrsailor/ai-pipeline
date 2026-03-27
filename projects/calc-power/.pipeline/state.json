@@ -1,7 +1,7 @@
 {
   "project": "calc-power",
   "created_at": "2026-03-27T23:00:46Z",
-  "current_phase": "design",
+  "current_phase": "development",
   "created_by": null,
   "approvers": {},
   "threads": {
@@ -26,12 +26,20 @@
       }
     },
     "design": {
-      "status": "in_progress",
+      "status": "completed",
       "approval": null,
-      "started_at": "2026-03-27T23:02:21Z"
+      "started_at": "2026-03-27T23:02:21Z",
+      "artifact": "docs/tech-design.md",
+      "completed_at": "2026-03-27T23:04:20Z",
+      "approved_by": {
+        "id": "e2e-bot",
+        "name": "E2E Bot",
+        "channel": "cli"
+      }
     },
     "development": {
-      "status": "pending"
+      "status": "in_progress",
+      "started_at": "2026-03-27T23:04:20Z"
     },
     "testing": {
       "status": "pending",
