@@ -5,10 +5,14 @@
   "type": "module",
   "description": "AI R&D pipeline: OpenClaw + Lobster + Discord",
   "scripts": {
+    "bot": "node bot.js",
     "poc": "node ../../../lab/lobster/bin/lobster.js run --file workflows/poc.lobster",
     "poc:tool": "node ../../../lab/lobster/bin/lobster.js run --mode tool --file workflows/poc.lobster",
     "product-dev": "node ../../../lab/lobster/bin/lobster.js run --mode tool --file workflows/product-dev.lobster",
     "bugfix": "node ../../../lab/lobster/bin/lobster.js run --mode tool --file workflows/bugfix.lobster",
     "resume": "node ../../../lab/lobster/bin/lobster.js resume"
+  },
+  "dependencies": {
+    "discord.js": "^14.25.1"
   }
 }
