@@ -1,7 +1,7 @@
 {
   "project": "hello-cli",
   "created_at": "2026-03-27T07:29:11Z",
-  "current_phase": "design",
+  "current_phase": "development",
   "threads": {
     "product": "1486990457786601594",
     "design": "1486990463205507173",
@@ -21,11 +21,18 @@
       }
     },
     "design": {
-      "status": "in_progress",
-      "started_at": "2026-03-27T07:58:55Z"
+      "status": "completed",
+      "started_at": "2026-03-27T07:58:55Z",
+      "completed_at": "2026-03-27T08:11:13Z",
+      "approved_by": {
+        "id": "zephyr",
+        "name": "Zephyr",
+        "channel": "cli"
+      }
     },
     "development": {
-      "status": "pending"
+      "status": "in_progress",
+      "started_at": "2026-03-27T08:11:13Z"
     },
     "testing": {
       "status": "pending"
