@@ -1,0 +1,37 @@
+<view class="container page-root">
+  <view class="card stage-card">
+    <text class="label">当前阶段</text>
+    <text class="stage-text">{{stageText}}</text>
+    <text class="status-chip">状态：{{status}}</text>
+  </view>
+
+  <view class="card timer-card">
+    <text class="label">倒计时</text>
+    <text class="countdown">{{countdownText}}</text>
+  </view>
+
+  <view class="card action-card">
+    <text class="label">操作区</text>
+    <view class="button-grid">
+      <button class="btn btn-primary" disabled>开始</button>
+      <button class="btn" disabled>暂停</button>
+      <button class="btn" disabled>继续</button>
+      <button class="btn" disabled>结束</button>
+      <button class="btn btn-secondary" disabled>重置</button>
+    </view>
+  </view>
+
+  <view class="card stats-card">
+    <text class="label">今日统计</text>
+    <view class="stats-row">
+      <view class="stats-item">
+        <text class="stats-value">{{focusTotalMin}}</text>
+        <text class="stats-label">专注分钟</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-value">{{focusPomodoroCount}}</text>
+        <text class="stats-label">番茄个数</text>
+      </view>
+    </view>
+  </view>
+</view>

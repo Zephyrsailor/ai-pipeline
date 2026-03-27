@@ -1,0 +1,14 @@
+{
+  "pages": [
+    "pages/index/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "专注番茄钟",
+    "navigationBarBackgroundColor": "#f8fafc",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f1f5f9",
+    "backgroundTextStyle": "light"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

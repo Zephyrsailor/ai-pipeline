@@ -1,0 +1,93 @@
+.page-root {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.label {
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.stage-card,
+.timer-card,
+.action-card,
+.stats-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.stage-text {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.status-chip {
+  align-self: flex-start;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 22rpx;
+}
+
+.countdown {
+  font-size: 88rpx;
+  font-weight: 800;
+  letter-spacing: 2rpx;
+  color: #0f172a;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16rpx;
+}
+
+.btn {
+  margin: 0;
+  font-size: 28rpx;
+  border-radius: 16rpx;
+}
+
+.btn::after {
+  border: none;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.btn-secondary {
+  grid-column: 1 / span 2;
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.stats-row {
+  display: flex;
+  gap: 16rpx;
+}
+
+.stats-item {
+  flex: 1;
+  background: #f8fafc;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.stats-value {
+  font-size: 48rpx;
+  font-weight: 700;
+}
+
+.stats-label {
+  font-size: 24rpx;
+  color: #64748b;
+}
