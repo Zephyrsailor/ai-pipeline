@@ -29,6 +29,7 @@ pipeline_create_project() {
   "project": "$slug",
   "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "current_phase": "requirements",
+  "threads": {},
   "phases": {
     "requirements": {"status": "in_progress"},
     "design": {"status": "pending"},
@@ -157,6 +158,45 @@ EOF
 
   # 输出移交通知（通道无关的结构化数据，adapter 负责格式化）
   cat "$handoff_file"
+}
+
+# ============================================================
+# Thread 管理
+# ============================================================
+
+# 获取项目在某个频道的 thread ID
+# Usage: pipeline_get_thread <slug> <channel_name>
+pipeline_get_thread() {
+  local slug="$1"
+  local channel_name="$2"
+  jq -r ".threads.\"$channel_name\" // empty" "$PROJECTS_DIR/$slug/.pipeline/state.json"
+}
+
+# 设置项目在某个频道的 thread ID
+# Usage: pipeline_set_thread <slug> <channel_name> <thread_id>
+pipeline_set_thread() {
+  local slug="$1"
+  local channel_name="$2"
+  local thread_id="$3"
+  local state_file="$PROJECTS_DIR/$slug/.pipeline/state.json"
+  local tmp=$(mktemp)
+  jq --arg ch "$channel_name" --arg tid "$thread_id" \
+    '.threads[$ch] = $tid' "$state_file" > "$tmp"
+  mv "$tmp" "$state_file"
+}
+
+# 获取某阶段对应的频道名
+# Usage: pipeline_phase_channel <phase>
+pipeline_phase_channel() {
+  local phase="$1"
+  case "$phase" in
+    requirements) echo "product" ;;
+    design)       echo "design" ;;
+    development)  echo "dev" ;;
+    testing)      echo "qa" ;;
+    release)      echo "release" ;;
+    *)            echo "" ;;
+  esac
 }
 
 # ============================================================

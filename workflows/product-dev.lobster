@@ -77,13 +77,22 @@ steps:
     stdin: $save_design.json
     when: $prd_signoff.approved
 
+  # ── Phase 2.5: Task Breakdown ──
+  - id: task_breakdown
+    run: ./bin/task-breakdown.sh
+    env:
+      REPO: "${repo}"
+      REQUEST_ID: "${slug}"
+    stdin: $design.stdout
+    when: $design_signoff.approved
+
   # ── Phase 3: Development ──
   - id: development
     run: ./bin/develop.sh
     env:
       REPO: "${repo}"
       REQUEST_ID: "${slug}"
-    stdin: $design.json
+    stdin: $task_breakdown.stdout
     when: $design_signoff.approved
 
   # ── Phase 4: Code Review (loop max 3 rounds) ──
@@ -91,6 +100,7 @@ steps:
     run: ./bin/review-loop.sh
     env:
       REPO: "${repo}"
+      REQUEST_ID: "${slug}"
       MAX_ROUNDS: "3"
     when: $design_signoff.approved
 
@@ -123,3 +133,4 @@ steps:
     env:
       REQUEST_ID: "${slug}"
       WORKFLOW: "product-dev"
+    stdin: $review.json

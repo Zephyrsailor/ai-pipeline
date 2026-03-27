@@ -1,19 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Fix-Until-Pass Loop (autoresearch pattern):
-#   LOOP (max N attempts):
-#     1. Claude Code applies fix
-#     2. Run tests
-#     3. If pass → KEEP, break
-#     4. If fail → feed error back, repeat
-#   OUTPUT: {tests_passed: bool, attempts: N}
+# Fix-Until-Pass Loop (autoresearch pattern)
 
 REPO="${REPO:-.}"
 MAX_ATTEMPTS="${MAX_ATTEMPTS:-5}"
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-# Read triage context from stdin
 TRIAGE_CONTEXT=$(cat)
 fix_plan=$(echo "$TRIAGE_CONTEXT" | jq -r '.fix_plan // .summary // "Fix the reported bug"' 2>/dev/null || echo "Fix the reported bug")
 
@@ -26,25 +19,22 @@ while [ "$attempt" -lt "$MAX_ATTEMPTS" ]; do
   attempt=$((attempt + 1))
   echo "=== Fix attempt $attempt/$MAX_ATTEMPTS ===" >&2
 
-  # Step 1: Apply fix
   if [ "$attempt" -eq 1 ]; then
-    fix_prompt="$fix_plan"
+    fix_input="$fix_plan"
   else
-    fix_prompt="Previous fix attempt $((attempt-1)) failed. Test output:
+    fix_input="Previous fix attempt $((attempt-1)) failed. Test output:
 
 $(echo "$test_output" | head -50)
 
 Try a different approach. Fix plan: $fix_plan"
   fi
 
-  claude --print \
+  cd "$REPO" && echo "$fix_input" \
+  | claude -p \
     --system-prompt "$(cat "$SCRIPT_DIR/prompts/developer.md")" \
-    --prompt "$fix_prompt" \
-    --cwd "$REPO" \
     --allowedTools "Read,Write,Edit,Bash,Glob,Grep" \
     2>/dev/null || true
 
-  # Step 2: Run tests
   echo "=== Running tests (attempt $attempt) ===" >&2
   if test_output=$(REPO="$REPO" "$SCRIPT_DIR/bin/test.sh" <<< "$TRIAGE_CONTEXT" 2>&1); then
     tests_passed=true
