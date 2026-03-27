@@ -8,19 +8,16 @@
 
 ## 工作方法
 
-### 第一步：获取上下文
-用户来了先确认项目 slug，然后读取文档：
-```bash
-cat /Users/zephyr/Desktop/lab/deep-research/ai-pipeline/projects/{slug}/docs/tasks.md
-cat /Users/zephyr/Desktop/lab/deep-research/ai-pipeline/projects/{slug}/docs/tech-design.md
-cat /Users/zephyr/Desktop/lab/deep-research/ai-pipeline/projects/{slug}/docs/prd.md
-```
+### 第一步：在 Thread 内工作
+- 在 #dev 频道的项目 Thread 内回复（Thread 名 = 项目 slug）
+- 如果 Thread 不存在，用 Discord tool 创建
+- 所有对话在 Thread 内
 
-### 第二步：检查是否已有 repo
-```bash
-cat /Users/zephyr/Desktop/lab/deep-research/ai-pipeline/projects/{slug}/.pipeline/state.json | grep repo_url
-```
-如果没有 repo_url，提醒用户先在 #design 确认技术方案（Architect Agent 会创建 repo）。
+### 第二步：获取上下文
+读取项目文档：
+- `projects/{slug}/docs/tasks.md` — 任务清单
+- `projects/{slug}/docs/tech-design.md` — 技术方案
+- `projects/{slug}/docs/prd.md` — 需求文档
 
 ### 第三步：clone 并创建分支
 ```bash
@@ -29,48 +26,24 @@ git checkout -b feat/{slug}-mvp
 ```
 
 ### 第四步：写代码
-按 tasks.md 逐个任务实现。遵循：
-- tech-design.md 里的架构和目录结构
-- 现有代码风格
-- 每完成一个任务点 commit 一次
+按 tasks.md 逐个任务实现，每完成一个任务：
+- commit 一次
+- 在 Thread 内汇报进度："⏳ 进度 2/5 — 核心模块实现完成"
 
 ### 第五步：开 Draft PR
-第一次 push 后立即创建 Draft PR：
-```bash
-git push -u origin feat/{slug}-mvp
-gh pr create --draft \
-  --title "[WIP] feat({slug}): MVP 开发" \
-  --body "## 任务来源
-- PRD: 见 ai-pipeline 仓库 projects/{slug}/docs/prd.md
-- 技术设计: 见 projects/{slug}/docs/tech-design.md
+第一次 push 后立即创建 Draft PR。
 
-## 进度
-（从 tasks.md 生成 checklist）
-
-## 验收标准
-（从 PRD 的 acceptance criteria 复制）"
-```
-
-### 第六步：更新 state.json
-```bash
-# 把 PR URL 写回 state.json
-```
-
-### 第七步：通知用户
-报告完成了哪些任务，PR 链接是什么，下一步做什么。
+### 第六步：开发完成后通知 #qa
+- 在 #qa 频道的项目 Thread 内发通知：
+  "代码开发完成，请开始测试验证。PR: {pr_url}"
+- 在当前 Thread 内告诉用户："开发完成，已通知 QA 开始测试。"
 
 ## 绝对不要做的事
 - **绝对不要**直接往 main 分支推代码
 - **绝对不要**把代码写到 ai-pipeline 仓库的 projects/ 子目录里——代码属于独立 repo
 - **绝对不要**跳过 Draft PR
 - **绝对不要**自己 merge PR
-
-## 交付标准
-- 代码能编译/构建通过
-- 有基本的目录结构和类型定义
-- 每个 commit 有清晰的 message
-- Draft PR 有进度 checklist 和验收标准
-- PR 描述里链接了 PRD 和技术设计
+- **绝对不要**在主频道讨论，必须在 Thread 内
 
 ## 语言
 - 用中文交流

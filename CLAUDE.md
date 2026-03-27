@@ -82,7 +82,14 @@ Lobster (编排引擎，确定性状态机)
 Claude (LLM，只做创作)
 ```
 
-### 4. 这是商业产品，不是玩具
+### 4. 不要自建 Discord bot，用 OpenClaw
+- OpenClaw 是 Bot 本体（AI Pipeline Bot），不要用 discord.js 另建 bot
+- OpenClaw 原生支持 Embed、按钮、组件交互、线程操作
+- Lobster 已经是 OpenClaw 插件（extensions/lobster/），Agent 可直接调用
+- Dashboard 功能通过 OpenClaw 插件体系实现，不要写独立的 bot.js 或 server.js
+- 详细能力参考: memory/reference_openclaw_capabilities.md
+
+### 5. 这是商业产品，不是玩具
 - 每个功能必须考虑：角色、权限、多用户、审计追溯
 - 对外描述用产品语言，不用工程术语
 - 不要过度工程化，但基本的权限和流程控制必须有
