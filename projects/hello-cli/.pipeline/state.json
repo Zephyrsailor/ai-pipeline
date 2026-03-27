@@ -1,37 +1,44 @@
 {
   "project": "hello-cli",
-  "created_at": "2026-03-27T08:40:19Z",
+  "created_at": "2026-03-27T21:15:49Z",
   "current_phase": "design",
+  "created_by": null,
+  "approvers": {},
   "threads": {
-    "product": "1487008356853092552",
-    "design": "1487008362225733667",
-    "dev": "1487008369322758278",
-    "qa": "1487008374368374804",
-    "bugs": "1487008379900661792",
-    "release": "1487008386452029503"
+    "product": "1487198484959334631",
+    "design": "1487198489585647758",
+    "dev": "1487198494493114603",
+    "qa": "1487198500273000599",
+    "bugs": "1487198504643465288",
+    "release": "1487198509714247743"
   },
+  "dashboard_message_id": null,
   "phases": {
     "requirements": {
       "status": "completed",
-      "completed_at": "2026-03-27T08:57:44Z",
+      "approval": null,
+      "completed_at": "2026-03-27T21:16:16Z",
       "approved_by": {
-        "id": "zephyr",
+        "id": "1211241185893421117",
         "name": "Zephyr",
-        "channel": "cli"
+        "channel": "discord"
       }
     },
     "design": {
       "status": "in_progress",
-      "started_at": "2026-03-27T08:57:44Z"
+      "approval": null,
+      "started_at": "2026-03-27T21:16:16Z"
     },
     "development": {
       "status": "pending"
     },
     "testing": {
-      "status": "pending"
+      "status": "pending",
+      "approval": null
     },
     "release": {
-      "status": "pending"
+      "status": "pending",
+      "approval": null
     }
   }
 }

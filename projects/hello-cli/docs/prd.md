@@ -1,72 +1,43 @@
-{
-  "project_name": "hello-cli",
-  "summary": "A minimal Node.js command-line tool that accepts an optional name argument and prints a greeting. When a name is provided (e.g., `hello-cli Alice`), it prints \"Hello Alice\". When no argument is given, it defaults to printing \"Hello World\". The tool should be installable globally via npm and follow Node.js CLI best practices.",
-  "user_stories": [
-    {
-      "id": "US-001",
-      "persona": "Developer / CLI user",
-      "story": "As a CLI user, I want to run the command with a name argument, so that I see a personalized greeting printed to stdout.",
-      "priority": "must",
-      "acceptance_criteria": [
-        "Given the CLI is installed, when I run `hello-cli Alice`, then stdout prints exactly `Hello Alice`",
-        "Given the CLI is installed, when I run `hello-cli 'John Doe'`, then stdout prints exactly `Hello John Doe`"
-      ]
-    },
-    {
-      "id": "US-002",
-      "persona": "Developer / CLI user",
-      "story": "As a CLI user, I want to run the command without any arguments, so that I see the default greeting 'Hello World'.",
-      "priority": "must",
-      "acceptance_criteria": [
-        "Given the CLI is installed, when I run `hello-cli` with no arguments, then stdout prints exactly `Hello World`"
-      ]
-    },
-    {
-      "id": "US-003",
-      "persona": "Developer",
-      "story": "As a developer, I want to install the tool globally via `npm install -g`, so that I can invoke `hello-cli` from any directory.",
-      "priority": "must",
-      "acceptance_criteria": [
-        "Given the package is published or linked locally, when I run `npm install -g hello-cli` or `npm link`, then the `hello-cli` command is available in my PATH",
-        "Given the tool is installed globally, when I run `hello-cli` from any directory, then it executes correctly"
-      ]
-    },
-    {
-      "id": "US-004",
-      "persona": "Developer",
-      "story": "As a developer, I want the tool to use only the first positional argument as the name, so that the behavior is predictable and simple.",
-      "priority": "should",
-      "acceptance_criteria": [
-        "Given the CLI is installed, when I run `hello-cli Alice Bob`, then stdout prints `Hello Alice` (only the first argument is used)"
-      ]
-    }
-  ],
-  "acceptance_criteria": [
-    "The CLI entry point uses a proper shebang line (#!/usr/bin/env node)",
-    "The package.json includes a valid `bin` field mapping `hello-cli` to the entry script",
-    "The tool exits with code 0 on successful execution",
-    "The tool works on Node.js >= 18",
-    "No external dependencies — uses only Node.js built-in APIs (process.argv)"
-  ],
-  "out_of_scope": [
-    "Flag/option parsing (e.g., --help, --version)",
-    "Interactive input (stdin prompting)",
-    "Internationalization / localization",
-    "Colored output or fancy formatting",
-    "TypeScript — plain JavaScript is sufficient for this scope",
-    "Publishing to npm registry"
-  ],
-  "assumptions": [
-    "The name is taken from the first positional CLI argument (process.argv[2])",
-    "No input validation or sanitization is needed — any string is a valid name",
-    "Output is a single line to stdout followed by a newline",
-    "The project will be a standalone new repository, not part of the existing ai-pipeline codebase",
-    "ESM (type: module) or CJS — either is acceptable; CJS is simpler for a trivial CLI"
-  ],
-  "dependencies": [
-    "Node.js runtime >= 18 installed on the target machine",
-    "npm for package management and global install/link"
-  ],
-  "priority": "must",
-  "estimated_complexity": "low"
-}
+# PRD v0.1｜hello-cli（最简命令行工具）
+
+## 1. 项目概述
+
+- **项目名**：hello-cli
+- **目标**：在本地命令行中，通过参数输入名字并输出固定问候语。
+- **目标用户**：开发者本人（本地使用）。
+- **约束**：只做单功能，不做扩展能力。
+
+## 2. 需求定义
+
+- 用户执行命令：`hello-cli 张三`
+- 程序输出：`Hello, 张三!`
+- 输出格式固定，不支持多语言/自定义模板。
+
+## 3. 用户故事
+
+- 作为用户，我想在命令行输入名字并立即看到问候语，以便验证 CLI 工具可用。
+
+## 4. 功能范围（MoSCoW）
+
+### Must
+- 支持命令格式：`hello-cli <name>`
+- 输出固定格式：`Hello, <name>!`
+- 本地命令行可直接运行
+
+### Won’t（本期不做）
+- 交互式输入
+- 帮助菜单（`-h/--help`）
+- 错误提示与参数校验增强
+- npm 发布/全局安装流程
+
+## 5. 验收标准（Acceptance Criteria）
+
+1. 在本地运行 `hello-cli 张三`，终端输出严格为 `Hello, 张三!`
+2. 输入任意名字参数（如 `hello-cli Alice`）输出 `Hello, Alice!`
+3. 执行耗时应为即时输出（肉眼无明显等待）
+
+## 6. 技术边界（MVP）
+
+- 仅本地运行
+- 单文件实现即可
+- 不要求日志、配置、测试框架

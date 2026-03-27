@@ -3,8 +3,8 @@
   "from_phase": "requirements",
   "to_phase": "design",
   "artifact": "docs/prd.md",
-  "summary": "需求文档已完成，包含 2 个用户故事、5 条验收标准\n",
-  "requested_by": {"id": "zephyr", "name": "Zephyr", "channel": "cli"},
-  "approved_by": {"id": "zephyr", "name": "Zephyr", "channel": "cli"},
-  "created_at": "2026-03-27T08:57:44Z"
+  "summary": "PRD 完成\n",
+  "requested_by": {"id": "1211241185893421117", "name": "Zephyr", "channel": "discord"},
+  "approved_by": {"id": "1211241185893421117", "name": "Zephyr", "channel": "discord"},
+  "created_at": "2026-03-27T21:16:16Z"
 }
