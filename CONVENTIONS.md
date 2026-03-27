@@ -94,12 +94,75 @@ requirements → design → development → testing → release
 - 回退：`rejected` 回到上一阶段，重新产出
 - 同一项目同一时间只有一个阶段 `in_progress`（无并发冲突）
 
-## 6. Git 提交规则
+## 6. 代码仓库与 PR 工作流
+
+### 6.1 仓库生命周期
+
+| 时机 | 操作 | 由谁执行 |
+|------|------|---------|
+| design 确认后 | `gh repo create {slug} --private` | Architect Agent |
+| 进入 dev | clone repo，创建 `feat/{slug}-mvp` 分支 | Dev Agent |
+| 开始写代码 | 在分支上开发，开 Draft PR | Dev Agent |
+| 代码完成 | PR 标记 Ready for Review | Dev Agent |
+| review 通过 | PR approved | Review Agent + 人工 |
+| 测试通过 | QA 在 PR 分支验证 | QA Agent |
+| 发布 | Merge PR → 部署 | Release Agent + 人工确认 |
+
+### 6.2 分支规范
+
+```
+main                    ← 始终可部署
+feat/{slug}-mvp         ← MVP 开发分支
+feat/{slug}-day1        ← 可选：按天拆分支
+fix/{slug}-{issue}      ← bug 修复分支
+```
+
+### 6.3 Draft PR 规范
+
+Dev Agent 开始写代码时立即创建 Draft PR：
+
+```
+标题: [WIP] feat({slug}): {一句话描述}
+Body:
+  ## 任务来源
+  - PRD: projects/{slug}/docs/prd.md
+  - 技术设计: projects/{slug}/docs/tech-design.md
+  - 任务清单: projects/{slug}/docs/tasks.md
+
+  ## 进度
+  - [x] Day1: 项目初始化与首页骨架
+  - [ ] Day2: 计时引擎
+  - [ ] Day3: ...
+
+  ## 验收标准
+  （从 PRD 的 acceptance criteria 复制）
+```
+
+每完成一天的任务，push 到同一分支，更新 PR 进度 checklist。
+
+### 6.4 state.json 扩展
+
+进入 dev 阶段后，state.json 增加 repo 和 PR 信息：
+
+```json
+{
+  "development": {
+    "status": "in_progress",
+    "repo_url": "https://github.com/user/pomodoro-miniapp",
+    "branch": "feat/pomodoro-miniapp-mvp",
+    "pr_number": 1,
+    "pr_url": "https://github.com/user/pomodoro-miniapp/pull/1"
+  }
+}
+```
+
+### 6.5 Git 提交规则
 
 - **Author**: `{Agent名} <{agent-id}@ai-pipeline.bot>`
-- **Commit message**: `{phase}({slug}): 描述`
-- **示例**: `requirements(pet-social): 完成 PRD v0.1`
-- **Push 冲突处理**: `git pull --rebase && git push`（不同项目写不同目录，文件不冲突）
+- **Commit message**: `{type}({slug}): 描述`
+- **类型**: `feat` (新功能), `fix` (修复), `docs` (文档), `test` (测试), `chore` (杂项)
+- **示例**: `feat(pomodoro-miniapp): 完成 Day1 项目初始化与首页骨架`
+- **Agent 只能推到自己创建的分支，不能直接推 main**
 
 ## 7. 通道抽象
 
