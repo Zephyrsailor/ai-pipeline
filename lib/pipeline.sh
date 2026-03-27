@@ -24,21 +24,39 @@ pipeline_create_project() {
 
   mkdir -p "$project_dir"/{.pipeline/handoffs,docs,src,tests}
 
-  cat > "$project_dir/.pipeline/state.json" << EOF
-{
-  "project": "$slug",
-  "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "current_phase": "requirements",
-  "threads": {},
-  "phases": {
-    "requirements": {"status": "in_progress"},
-    "design": {"status": "pending"},
-    "development": {"status": "pending"},
-    "testing": {"status": "pending"},
-    "release": {"status": "pending"}
-  }
-}
-EOF
+  # 用 jq 构建 state.json
+  # 通过临时文件传递 JSON 避免 shell 引号问题
+  local tmp_cb=$(mktemp)
+  local tmp_ap=$(mktemp)
+  echo "${CREATED_BY:-null}" > "$tmp_cb"
+  echo "${APPROVERS:-{}}" > "$tmp_ap"
+  # 验证 JSON，无效则回退
+  jq . "$tmp_cb" >/dev/null 2>&1 || echo "null" > "$tmp_cb"
+  jq . "$tmp_ap" >/dev/null 2>&1 || echo "{}" > "$tmp_ap"
+
+  jq -n \
+    --arg slug "$slug" \
+    --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    --slurpfile created_by "$tmp_cb" \
+    --slurpfile approvers "$tmp_ap" \
+    '{
+      project: $slug,
+      created_at: $now,
+      current_phase: "requirements",
+      created_by: $created_by[0],
+      approvers: $approvers[0],
+      threads: {},
+      dashboard_message_id: null,
+      phases: {
+        requirements: {status: "in_progress", approval: null},
+        design: {status: "pending", approval: null},
+        development: {status: "pending"},
+        testing: {status: "pending", approval: null},
+        release: {status: "pending", approval: null}
+      }
+    }' > "$project_dir/.pipeline/state.json"
+
+  rm -f "$tmp_cb" "$tmp_ap"
 
   echo "$project_dir"
 }
@@ -197,6 +215,76 @@ pipeline_phase_channel() {
     release)      echo "release" ;;
     *)            echo "" ;;
   esac
+}
+
+# ============================================================
+# 审批管理
+# ============================================================
+
+# 设置某阶段为待审批状态
+# Usage: pipeline_request_approval <slug> <phase>
+pipeline_request_approval() {
+  local slug="$1"
+  local phase="$2"
+  local state_file="$PROJECTS_DIR/$slug/.pipeline/state.json"
+  local tmp=$(mktemp)
+  local now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  jq --arg phase "$phase" --arg now "$now" \
+    '.phases[$phase].approval = {"status": "pending", "requested_at": $now}' \
+    "$state_file" > "$tmp"
+  mv "$tmp" "$state_file"
+}
+
+# 获取某阶段的审批人列表
+# Usage: pipeline_get_approvers <slug> <phase>
+pipeline_get_approvers() {
+  local slug="$1"
+  local phase="$2"
+  local state_file="$PROJECTS_DIR/$slug/.pipeline/state.json"
+  # 优先项目级指定，回退到 roles.json 默认
+  local approvers
+  approvers=$(jq -r ".approvers.\"$phase\" // [] | .[]" "$state_file" 2>/dev/null)
+  if [ -z "$approvers" ]; then
+    local roles_file="$PIPELINE_ROOT/config/roles.json"
+    local default_role
+    default_role=$(jq -r ".approval_phases.\"$phase\".default_role // empty" "$roles_file" 2>/dev/null)
+    echo "$default_role"
+  else
+    echo "$approvers"
+  fi
+}
+
+# 记录审批结果
+# Usage: pipeline_record_approval <slug> <phase> <user_id> <user_name> <channel> <decision>
+pipeline_record_approval() {
+  local slug="$1"
+  local phase="$2"
+  local user_id="$3"
+  local user_name="$4"
+  local channel="$5"
+  local decision="$6"  # approved / rejected
+  local state_file="$PROJECTS_DIR/$slug/.pipeline/state.json"
+  local tmp=$(mktemp)
+  local now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  jq --arg phase "$phase" --arg now "$now" \
+    --arg uid "$user_id" --arg uname "$user_name" --arg ch "$channel" --arg dec "$decision" \
+    '.phases[$phase].approval = {
+      "status": $dec,
+      "decided_by": {"id": $uid, "name": $uname, "channel": $ch},
+      "decided_at": $now
+    }' "$state_file" > "$tmp"
+  mv "$tmp" "$state_file"
+}
+
+# 存储 dashboard 消息 ID（用于编辑更新）
+# Usage: pipeline_set_dashboard_msg <slug> <message_id>
+pipeline_set_dashboard_msg() {
+  local slug="$1"
+  local msg_id="$2"
+  local state_file="$PROJECTS_DIR/$slug/.pipeline/state.json"
+  local tmp=$(mktemp)
+  jq --arg mid "$msg_id" '.dashboard_message_id = $mid' "$state_file" > "$tmp"
+  mv "$tmp" "$state_file"
 }
 
 # ============================================================

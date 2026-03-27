@@ -1,0 +1,50 @@
+{
+  "roles": {
+    "owner": {
+      "name": "Owner",
+      "description": "项目发起人/老板，负责最终发布决策",
+      "default_approvals": ["release"]
+    },
+    "product": {
+      "name": "Product",
+      "description": "产品经理，负责需求确认",
+      "default_approvals": ["requirements"]
+    },
+    "tech-lead": {
+      "name": "Tech Lead",
+      "description": "技术负责人，负责设计和质量把关",
+      "default_approvals": ["design", "testing"]
+    },
+    "developer": {
+      "name": "Developer",
+      "description": "开发者，无默认审批权",
+      "default_approvals": []
+    }
+  },
+
+  "approval_phases": {
+    "requirements": {
+      "name": "需求确认",
+      "description": "PRD 是否符合预期",
+      "default_role": "product"
+    },
+    "design": {
+      "name": "设计确认",
+      "description": "技术方案是否可行",
+      "default_role": "tech-lead"
+    },
+    "testing": {
+      "name": "测试确认",
+      "description": "质量是否达标",
+      "default_role": "tech-lead"
+    },
+    "release": {
+      "name": "发布确认",
+      "description": "是否可以上线",
+      "default_role": "owner"
+    }
+  },
+
+  "approval_mode": "any",
+  "_comment_approval_mode": "any = 任一审批人通过即可, all = 全部通过才行"
+}

@@ -58,3 +58,31 @@ Post progress updates to the appropriate Discord channel as each major phase com
 
 ## Request IDs
 Generate unique IDs as: `YYYYMMDD-HHMMSS-<4 hex chars>`
+
+## Architecture Principles (MUST FOLLOW)
+
+### 1. LLM 不控制流程，流程控制 LLM
+- **Lobster** = 确定性状态机，负责所有编排逻辑（谁先谁后、审批门控、阶段流转）
+- **Claude (LLM)** = 只做创作（写 PRD、设计、编码），不参与控制流
+- **bot.js** = 纯 Discord 适配器，只连接 Discord ↔ Lobster，不含业务逻辑
+- **绝对不要**在 bot.js 里写编排逻辑（什么阶段调什么脚本）
+- **绝对不要**让 LLM 决定下一步做什么
+
+### 2. Shell 脚本只调 AI Agent
+- bin/*.sh 的唯一职责：调 `claude -p` 做创作 + 发 Discord 通知
+- **绝对不要**在 shell 脚本里用 jq 做复杂 JSON 操作（容易出引号转义 bug）
+- 状态管理（state.json）由 Lobster 或 JavaScript 处理
+
+### 3. 三层分离
+```
+Discord (入口/通知)
+  ↕ bot.js (适配器，无业务逻辑)
+Lobster (编排引擎，确定性状态机)
+  ↕ bin/*.sh (AI Agent 薄封装)
+Claude (LLM，只做创作)
+```
+
+### 4. 这是商业产品，不是玩具
+- 每个功能必须考虑：角色、权限、多用户、审计追溯
+- 对外描述用产品语言，不用工程术语
+- 不要过度工程化，但基本的权限和流程控制必须有
