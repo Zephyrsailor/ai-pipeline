@@ -1,52 +1,71 @@
 {
   "project_name": "hello-cli",
-  "summary": "A minimal Node.js command-line tool that accepts an optional name argument and prints a personalized greeting. When a name is provided, it outputs 'Hello, {name}!' to stdout. When no argument is given, it defaults to 'Hello, World!'. The tool is intentionally kept simple as a lightweight utility with no external dependencies.",
+  "summary": "A minimal Node.js command-line tool that accepts an optional name argument and prints a greeting. When a name is provided (e.g., `hello-cli Alice`), it prints \"Hello Alice\". When no argument is given, it defaults to printing \"Hello World\". The tool should be installable globally via npm and follow Node.js CLI best practices.",
   "user_stories": [
     {
       "id": "US-001",
-      "persona": "CLI user",
-      "story": "As a CLI user, I want to run hello-cli with a name argument, so that I get a personalized greeting printed to the console.",
+      "persona": "Developer / CLI user",
+      "story": "As a CLI user, I want to run the command with a name argument, so that I see a personalized greeting printed to stdout.",
       "priority": "must",
       "acceptance_criteria": [
-        "Given the CLI is installed, when I run 'hello-cli Alice', then the output is exactly 'Hello, Alice!'",
-        "Given the CLI is installed, when I run 'hello-cli \"John Doe\"', then the output is exactly 'Hello, John Doe!'"
+        "Given the CLI is installed, when I run `hello-cli Alice`, then stdout prints exactly `Hello Alice`",
+        "Given the CLI is installed, when I run `hello-cli 'John Doe'`, then stdout prints exactly `Hello John Doe`"
       ]
     },
     {
       "id": "US-002",
-      "persona": "CLI user",
-      "story": "As a CLI user, I want to run hello-cli without any arguments, so that I get the default greeting 'Hello, World!' printed to the console.",
+      "persona": "Developer / CLI user",
+      "story": "As a CLI user, I want to run the command without any arguments, so that I see the default greeting 'Hello World'.",
       "priority": "must",
       "acceptance_criteria": [
-        "Given the CLI is installed, when I run 'hello-cli' with no arguments, then the output is exactly 'Hello, World!'"
+        "Given the CLI is installed, when I run `hello-cli` with no arguments, then stdout prints exactly `Hello World`"
+      ]
+    },
+    {
+      "id": "US-003",
+      "persona": "Developer",
+      "story": "As a developer, I want to install the tool globally via `npm install -g`, so that I can invoke `hello-cli` from any directory.",
+      "priority": "must",
+      "acceptance_criteria": [
+        "Given the package is published or linked locally, when I run `npm install -g hello-cli` or `npm link`, then the `hello-cli` command is available in my PATH",
+        "Given the tool is installed globally, when I run `hello-cli` from any directory, then it executes correctly"
+      ]
+    },
+    {
+      "id": "US-004",
+      "persona": "Developer",
+      "story": "As a developer, I want the tool to use only the first positional argument as the name, so that the behavior is predictable and simple.",
+      "priority": "should",
+      "acceptance_criteria": [
+        "Given the CLI is installed, when I run `hello-cli Alice Bob`, then stdout prints `Hello Alice` (only the first argument is used)"
       ]
     }
   ],
   "acceptance_criteria": [
-    "The tool runs on Node.js without any external runtime dependencies",
-    "The executable is invokable as 'hello-cli' after npm install or npm link",
-    "Output is printed to stdout followed by a newline",
-    "The process exits with code 0 on success",
-    "package.json includes a 'bin' field mapping 'hello-cli' to the entry script"
+    "The CLI entry point uses a proper shebang line (#!/usr/bin/env node)",
+    "The package.json includes a valid `bin` field mapping `hello-cli` to the entry script",
+    "The tool exits with code 0 on successful execution",
+    "The tool works on Node.js >= 18",
+    "No external dependencies — uses only Node.js built-in APIs (process.argv)"
   ],
   "out_of_scope": [
-    "Interactive prompts or input",
     "Flag/option parsing (e.g., --help, --version)",
-    "Multiple name arguments or list handling",
-    "Colorized or formatted output",
-    "Configuration files",
-    "Logging or error reporting beyond basic stdout",
+    "Interactive input (stdin prompting)",
+    "Internationalization / localization",
+    "Colored output or fancy formatting",
+    "TypeScript — plain JavaScript is sufficient for this scope",
     "Publishing to npm registry"
   ],
   "assumptions": [
-    "The tool will be a standalone Node.js project with its own package.json",
-    "Only the first positional argument is used as the name; additional arguments are ignored",
-    "The name is used as-is with no validation, sanitization, or transformation",
-    "The stakeholder wants ESM or CommonJS — we will default to ESM (type: module) consistent with the parent pipeline conventions",
-    "The shebang line (#!/usr/bin/env node) will be included for direct execution"
+    "The name is taken from the first positional CLI argument (process.argv[2])",
+    "No input validation or sanitization is needed — any string is a valid name",
+    "Output is a single line to stdout followed by a newline",
+    "The project will be a standalone new repository, not part of the existing ai-pipeline codebase",
+    "ESM (type: module) or CJS — either is acceptable; CJS is simpler for a trivial CLI"
   ],
   "dependencies": [
-    "Node.js >= 18 runtime installed on the target machine"
+    "Node.js runtime >= 18 installed on the target machine",
+    "npm for package management and global install/link"
   ],
   "priority": "must",
   "estimated_complexity": "low"
