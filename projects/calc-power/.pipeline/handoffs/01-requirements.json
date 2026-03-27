@@ -1,0 +1,10 @@
+{
+  "id": "01-requirements",
+  "from_phase": "requirements",
+  "to_phase": "design",
+  "artifact": "docs/prd.md",
+  "summary": "PRD completed\n",
+  "requested_by": {"id": "e2e-bot", "name": "E2E Bot", "channel": "cli"},
+  "approved_by": {"id": "e2e-bot", "name": "E2E Bot", "channel": "cli"},
+  "created_at": "2026-03-27T23:02:21Z"
+}
