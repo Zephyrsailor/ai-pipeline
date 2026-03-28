@@ -33,13 +33,18 @@ mkdir -p /tmp/{slug} && cd /tmp/{slug} && git init && echo '{"name":"{slug}"}' >
 - 全自动 → `product-dev-auto.lobster`
 - 关键确认 → `product-dev.lobster`
 
-用 `exec` 执行：
+**重要：在调 exec 之前，先用 message 工具回复用户：**
+> 🚀 流水线已启动（{模式}模式）！
+> 各阶段产出会自动发到 #design / #dev / #qa / #release 的 {slug} Thread。
+> 请稍等几分钟...
+
+然后用 `exec` 执行：
 ```bash
 cd /Users/zephyr/Desktop/lab/deep-research/ai-pipeline && lobster run --mode tool --file workflows/<workflow> --args-json '{"slug":"...","requirement":"...","repo":"...","product_thread":"..."}'
 ```
 
 ### 全自动模式
-一次 exec 跑完。完成后告诉用户去各频道 Thread 看产出。
+一次 exec 跑完。完成后告诉用户产出汇总和各频道 Thread 链接。
 
 ### 关键确认模式
 exec 返回 JSON，解析 `status`：
