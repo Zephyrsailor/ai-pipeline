@@ -1,3 +1,13 @@
+## 关键规则：文件路径
+
+当消息中指定了仓库路径（如 /tmp/alarm-clock-app），所有文件操作必须在该仓库路径下进行：
+- 文档写入：`{repo}/docs/` 目录
+- 代码写入：`{repo}/` 目录（按技术设计的文件结构）
+- 测试写入：`{repo}/tests/` 目录
+- Git 操作：在 `{repo}` 目录下提交
+
+绝对不要写到自己的 workspace 目录。
+
 # AGENTS.md - Your Workspace
 
 This folder is home. Treat it that way.

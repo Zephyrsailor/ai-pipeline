@@ -1,70 +1,58 @@
 name: bugfix
 args:
   repo:
-    description: "Target repository path"
-    default: "."
+    description: "Target repository path (absolute)"
   bug_report:
     description: "Bug report or error description"
   request_id:
     description: "Unique request identifier"
+  bugs_thread:
+    description: "Discord thread ID for #bugs"
+  dev_thread:
+    description: "Discord thread ID for #dev"
+  qa_thread:
+    description: "Discord thread ID for #qa"
+  release_thread:
+    description: "Discord thread ID for #release"
 steps:
-  # Phase 1: Triage
   - id: triage
-    run: ./bin/triage.sh
-    env:
-      REPO: "${repo}"
-      BUG_REPORT: "${bug_report}"
-      REQUEST_ID: "${request_id}"
+    run: |
+      MSG="Repo ${repo}. Bug report: ${bug_report}. Analyze root cause, assess severity, provide fix plan. Reply in markdown Chinese."
+      openclaw agent -m "$MSG" --agent p-triage --deliver --channel discord --to ${bugs_thread} --json
 
   - id: triage_signoff
     approval:
-      prompt: "Bug triaged. Review root cause analysis and approve fix plan."
+      prompt: "Bug triaged. Approve fix?"
     stdin: $triage.json
 
-  # Phase 2: Fix Loop (max 5 attempts)
   - id: fix
-    run: ./bin/fix-until-pass.sh
-    env:
-      REPO: "${repo}"
-      MAX_ATTEMPTS: "5"
-      REQUEST_ID: "${request_id}"
-    stdin: $triage.json
+    run: |
+      TRIAGE=$(cat)
+      MSG="Repo ${repo}. Triage result: $TRIAGE. Fix the bug, run tests, commit: fix(scope): description. Reply with summary in Chinese."
+      openclaw agent -m "$MSG" --agent p-dev --deliver --channel discord --to ${dev_thread} --json
+    stdin: $triage.stdout
     when: $triage_signoff.approved
 
-  # Phase 3: Code Review
   - id: review
-    run: ./bin/review-loop.sh
-    env:
-      REPO: "${repo}"
-      MAX_ROUNDS: "2"
+    run: |
+      MSG="Repo ${repo}. Review recent bugfix changes. Reply with issues or approval in Chinese."
+      openclaw agent -m "$MSG" --agent p-reviewer --deliver --channel discord --to ${dev_thread} --json
     when: $triage_signoff.approved
 
-  # Phase 4: Verification
   - id: verify
-    run: ./bin/test.sh
-    env:
-      REPO: "${repo}"
-      REQUEST_ID: "${request_id}"
-    stdin: $triage.json
+    run: |
+      MSG="Repo ${repo}. Original bug: ${bug_report}. Verify fix, run all tests, write report to ${repo}/docs/test-report.md. Reply with results in Chinese."
+      openclaw agent -m "$MSG" --agent p-qa --deliver --channel discord --to ${qa_thread} --json
     when: $triage_signoff.approved
 
   - id: release_signoff
     approval:
-      prompt: "Fix verified. Approve release?"
+      prompt: "Bug fix verified. Approve release?"
     stdin: $verify.json
     when: $triage_signoff.approved
 
-  # Phase 5: Release
   - id: release
-    run: ./bin/release.sh
-    env:
-      REPO: "${repo}"
-      REQUEST_ID: "${request_id}"
+    run: |
+      MSG="Repo ${repo}. Request ID: ${request_id}. Write release notes to ${repo}/docs/release-notes.md, commit. Reply with summary in Chinese."
+      openclaw agent -m "$MSG" --agent p-release --deliver --channel discord --to ${release_thread} --json
     when: $release_signoff.approved
-
-  # Metrics
-  - id: metrics
-    run: ./bin/log-metric.sh
-    env:
-      REQUEST_ID: "${request_id}"
-      WORKFLOW: "bugfix"
