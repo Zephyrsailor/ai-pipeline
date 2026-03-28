@@ -4,6 +4,21 @@ args:
     description: "Project slug"
   discord_token:
     description: "Discord bot token"
+  ch_product:
+    description: "Discord channel ID for #product"
+    default: "1486613586229854278"
+  ch_design:
+    description: "Discord channel ID for #design"
+    default: "1486613609839726736"
+  ch_dev:
+    description: "Discord channel ID for #dev"
+    default: "1486613643851202743"
+  ch_qa:
+    description: "Discord channel ID for #qa"
+    default: "1486613658984517683"
+  ch_release:
+    description: "Discord channel ID for #release"
+    default: "1486613723241123900"
 steps:
   - id: create_threads
     run: |
@@ -20,11 +35,11 @@ steps:
         echo "$resp" | jq -r '.id // empty'
       }
 
-      P=$(create_thread 1486613586229854278 "$SLUG")
-      D=$(create_thread 1486613609839726736 "$SLUG")
-      V=$(create_thread 1486613643851202743 "$SLUG")
-      Q=$(create_thread 1486613658984517683 "$SLUG")
-      R=$(create_thread 1486613723241123900 "$SLUG")
+      P=$(create_thread "${ch_product}" "$SLUG")
+      D=$(create_thread "${ch_design}" "$SLUG")
+      V=$(create_thread "${ch_dev}" "$SLUG")
+      Q=$(create_thread "${ch_qa}" "$SLUG")
+      R=$(create_thread "${ch_release}" "$SLUG")
 
       jq -n \
         --arg slug "$SLUG" \
