@@ -37,57 +37,40 @@ steps:
       MSG="Project [${slug}]. Read ${repo}/docs/prd.md, write tech design to ${repo}/docs/tech-design.md and task breakdown to ${repo}/docs/tasks.md. Git commit in ${repo}. Reply with markdown summary in Chinese."
       openclaw agent -m "$MSG" --agent p-architect --deliver --channel discord --to "$DT" --json
 
-  - id: design_signoff
-    approval:
-      prompt: "Design complete. Check #design thread. Confirm to start development."
-    stdin: $design.json
-
   - id: create_branch
     run: |
       cd "${repo}" && git checkout -b "feat/${slug}-mvp" 2>/dev/null || git checkout "feat/${slug}-mvp"
       git push -u origin "feat/${slug}-mvp" 2>/dev/null || true
       echo "branch: feat/${slug}-mvp"
-    when: $design_signoff.approved
 
   - id: development
     run: |
       VT=$(jq -r '.threads.dev' "${repo}/docs/.pipeline/state.json")
       MSG="Project [${slug}]. Read ${repo}/docs/tech-design.md and ${repo}/docs/tasks.md. Implement all code in ${repo}, generate ${repo}/README.md. Commit each module. Ensure tests pass. Reply with summary in Chinese."
       openclaw agent -m "$MSG" --agent p-dev --deliver --channel discord --to "$VT" --json
-    when: $design_signoff.approved
 
   - id: push_and_pr
     run: |
       cd "${repo}" && git push origin "feat/${slug}-mvp" 2>/dev/null || true
       gh pr create --base main --head "feat/${slug}-mvp" --title "feat(${slug}): MVP" --body "PRD: docs/prd.md | Design: docs/tech-design.md" --draft 2>/dev/null || echo "PR exists"
-    when: $design_signoff.approved
 
   - id: review
     run: |
       VT=$(jq -r '.threads.dev' "${repo}/docs/.pipeline/state.json")
       MSG="Project [${slug}], repo ${repo}. Review recent code changes. Check quality, security, tests. Reply in Chinese."
       openclaw agent -m "$MSG" --agent p-reviewer --deliver --channel discord --to "$VT" --json
-    when: $design_signoff.approved
-
-  - id: dev_signoff
-    approval:
-      prompt: "Development and review complete. Check #dev thread and PR. Confirm to proceed to testing and release."
-    stdin: $review.json
-    when: $design_signoff.approved
 
   - id: testing
     run: |
       QT=$(jq -r '.threads.qa' "${repo}/docs/.pipeline/state.json")
       MSG="Project [${slug}]. Read ${repo}/docs/prd.md acceptance criteria. Run tests, write report to ${repo}/docs/test-report.md. Git commit. Reply with results in Chinese."
       openclaw agent -m "$MSG" --agent p-qa --deliver --channel discord --to "$QT" --json
-    when: $dev_signoff.approved
 
   - id: release
     run: |
       RT=$(jq -r '.threads.release' "${repo}/docs/.pipeline/state.json")
       MSG="Project [${slug}], repo ${repo}. Write release notes to ${repo}/docs/release-notes.md. Git commit. Reply with summary in Chinese."
       openclaw agent -m "$MSG" --agent p-release --deliver --channel discord --to "$RT" --json
-    when: $dev_signoff.approved
 
   - id: finalize
     run: |
@@ -97,4 +80,3 @@ steps:
       git push origin "feat/${slug}-mvp" 2>/dev/null || true
       PR_URL=$(gh pr view --json url -q '.url' 2>/dev/null || echo "no PR")
       echo "{\"status\":\"complete\",\"pr\":\"$PR_URL\"}"
-    when: $dev_signoff.approved
