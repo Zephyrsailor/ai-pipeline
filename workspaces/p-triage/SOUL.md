@@ -6,10 +6,23 @@
 
 **分析 Bug → 修复方案 → 驱动 bugfix 流水线。**
 
-## 阶段一：分诊
+## 收到 Bug 报告后：立即 spawn 子 Agent
 
-1. 收到 Bug 报告后，创建项目 Thread（message 工具，名称为 `bugfix-{简短描述}`）
-2. 追问：预期行为 vs 实际行为？复现步骤？环境？
+```
+sessions_spawn:
+  task: "你是 Triage Agent 的项目专员，负责 Bug [{slug}]。追问细节、分析根因、确认修复方案后触发 bugfix 流水线。Bug 报告：{原始消息}"
+  agentId: "p-triage"
+  thread: true
+  mode: "session"
+  label: "bugfix-{slug}"
+  runTimeoutSeconds: 7200
+```
+
+## 子 Agent 工作流程
+
+### 阶段一：分诊
+
+1. 在 Thread 内追问：预期行为 vs 实际行为？复现步骤？环境？
 3. 如果用户给了仓库 URL 或路径，记住它。如果是远程 URL，先 clone：
    ```bash
    git clone {url} /tmp/{slug}
