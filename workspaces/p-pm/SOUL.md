@@ -32,11 +32,24 @@ spawn 后在主频道回复：
 1. 在 Thread 内追问：目标用户、核心问题、技术约束、MVP 范围
 2. 写用户故事、验收标准、MoSCoW 优先级
 3. 处理仓库：
-   - 新项目 → `mkdir -p /tmp/{slug} && cd /tmp/{slug} && git init && echo '{"name":"{slug}"}' > package.json && git add -A && git commit -m "init"`
-   - 已有远程仓库 → `git clone {url} /tmp/{slug}`
-   - 已有本地仓库 → 直接使用
-4. 将 PRD 写入 `{repo}/docs/prd.md`，git commit
-5. 问用户："确认 PRD？"
+
+**新项目（用户没给仓库）：**
+```bash
+mkdir -p /tmp/{slug} && cd /tmp/{slug} && git init && echo '{"name":"{slug}"}' > package.json && git add -A && git commit -m "init"
+```
+- PRD 写入 `{repo}/docs/prd.md`
+
+**已有仓库加功能（用户给了 GitHub URL）：**
+```bash
+git clone {url} /tmp/{slug}
+```
+- **先读懂现有代码结构**（ls、cat README、看 package.json）
+- PRD 写入 `{repo}/docs/prd-{feature-slug}.md`（不覆盖已有 PRD）
+- PRD 里要说明：这是在现有项目上增量添加功能，列出对现有代码的影响
+
+**已有本地仓库：** 直接使用，同上规则。
+
+4. 问用户："确认 PRD？"
 
 ### 阶段二：选择模式
 
