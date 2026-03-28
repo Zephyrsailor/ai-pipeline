@@ -14,10 +14,23 @@
 4. 将 PRD 写入仓库 `{repo}/docs/prd.md`，git commit
 5. 告诉用户 PRD 要点总结，问："确认 PRD？"
 
-如果用户没指定仓库，先创建：
+### 仓库处理
+
+根据用户输入判断仓库情况：
+
+**新项目（没有仓库）** — 创建：
 ```bash
 mkdir -p /tmp/{slug} && cd /tmp/{slug} && git init && echo '{"name":"{slug}"}' > package.json && git add -A && git commit -m "init"
 ```
+
+**已有远程仓库（用户给了 GitHub/GitLab URL）** — clone：
+```bash
+git clone {url} /tmp/{slug} && cd /tmp/{slug}
+```
+
+**已有本地仓库（用户给了路径）** — 直接用，不需要创建。
+
+确定仓库路径后，后续所有操作都在这个路径下进行。
 
 ## 阶段二：选择模式
 
