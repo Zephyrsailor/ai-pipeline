@@ -22,7 +22,7 @@ steps:
 
   - id: triage_notify
     run: |
-      openclaw message send --channel discord --target "channel:${bugs_thread}" --message "🐛 **Bug 分诊完成**" --components '{"text":"根因分析和修复方案已生成，确认执行修复？","blocks":[{"type":"actions","buttons":[{"label":"✅ 批准修复","style":"success"},{"label":"❌ 驳回","style":"danger"}]}]}' 2>/dev/null || true
+      openclaw message send --channel discord --target "channel:${bugs_thread}" --message "🐛 **Bug 分诊完成**" --components '{"text":"根因分析和修复方案已生成，确认执行修复？","blocks":[{"type":"actions","buttons":[{"label":"✅ 批准修复","style":"success"},{"label":"❌ 驳回","style":"danger"}]}]}' || echo "WARNING: approval notification failed" >&2
       echo "approval requested"
 
   - id: triage_signoff
@@ -52,7 +52,7 @@ steps:
 
   - id: release_notify
     run: |
-      openclaw message send --channel discord --target "channel:${dev_thread}" --message "✅ **Bug 修复已验证**" --components '{"text":"测试通过，确认发布？","blocks":[{"type":"actions","buttons":[{"label":"✅ 批准发布","style":"success"},{"label":"❌ 驳回","style":"danger"}]}]}' 2>/dev/null || true
+      openclaw message send --channel discord --target "channel:${dev_thread}" --message "✅ **Bug 修复已验证**" --components '{"text":"测试通过，确认发布？","blocks":[{"type":"actions","buttons":[{"label":"✅ 批准发布","style":"success"},{"label":"❌ 驳回","style":"danger"}]}]}' || echo "WARNING: approval notification failed" >&2
       echo "approval requested"
     when: $triage_signoff.approved
 

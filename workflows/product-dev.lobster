@@ -27,7 +27,7 @@ steps:
           phases:{requirements:{status:"in_progress",started_at:$now},
                   design:{status:"pending"},development:{status:"pending"},
                   testing:{status:"pending"},release:{status:"pending"}}}' > "$STATE"
-      cd "${repo}" && git add -A && git commit -q -m "chore(${slug}): init pipeline" 2>/dev/null || true
+      cd "${repo}" && git add docs/.pipeline/ && git commit -q -m "chore(${slug}): init pipeline" 2>/dev/null || true
       echo "initialized"
 
   # ── Requirements ──
@@ -46,7 +46,7 @@ steps:
 
   - id: prd_notify
     run: |
-      openclaw message send --channel discord --target "channel:${product_thread}" --message "📋 **[${slug}] PRD 已完成**" --components '{"text":"PRD 已写入 docs/prd.md，请审阅后在 #dashboard 批准。","blocks":[{"type":"actions","buttons":[{"label":"✅ 批准 PRD","style":"success"},{"label":"❌ 驳回","style":"danger"}]}]}' 2>/dev/null || true
+      openclaw message send --channel discord --target "channel:${product_thread}" --message "📋 **[${slug}] PRD 已完成**" --components '{"text":"PRD 已写入 docs/prd.md，请审阅后在 #dashboard 批准。","blocks":[{"type":"actions","buttons":[{"label":"✅ 批准 PRD","style":"success"},{"label":"❌ 驳回","style":"danger"}]}]}' || echo "WARNING: approval notification failed" >&2
       echo "approval requested"
 
   - id: prd_signoff
@@ -72,7 +72,7 @@ steps:
 
   - id: design_notify
     run: |
-      openclaw message send --channel discord --target "channel:${design_thread}" --message "🏗️ **[${slug}] 技术设计已完成**" --components '{"text":"tech-design.md 和 tasks.md 已写入，请审阅。","blocks":[{"type":"actions","buttons":[{"label":"✅ 批准设计","style":"success"},{"label":"❌ 驳回","style":"danger"}]}]}' 2>/dev/null || true
+      openclaw message send --channel discord --target "channel:${design_thread}" --message "🏗️ **[${slug}] 技术设计已完成**" --components '{"text":"tech-design.md 和 tasks.md 已写入，请审阅。","blocks":[{"type":"actions","buttons":[{"label":"✅ 批准设计","style":"success"},{"label":"❌ 驳回","style":"danger"}]}]}' || echo "WARNING: approval notification failed" >&2
       echo "approval requested"
     when: $prd_signoff.approved
 
@@ -129,7 +129,7 @@ steps:
 
   - id: release_notify
     run: |
-      openclaw message send --channel discord --target "channel:${dev_thread}" --message "🚀 **[${slug}] 开发测试完成**" --components '{"text":"代码审查和测试已通过，确认发布？","blocks":[{"type":"actions","buttons":[{"label":"✅ 批准发布","style":"success"},{"label":"❌ 驳回","style":"danger"}]}]}' 2>/dev/null || true
+      openclaw message send --channel discord --target "channel:${dev_thread}" --message "🚀 **[${slug}] 开发测试完成**" --components '{"text":"代码审查和测试已通过，确认发布？","blocks":[{"type":"actions","buttons":[{"label":"✅ 批准发布","style":"success"},{"label":"❌ 驳回","style":"danger"}]}]}' || echo "WARNING: approval notification failed" >&2
       echo "approval requested"
     when: $design_signoff.approved
 
@@ -150,12 +150,11 @@ steps:
     run: |
       cd "${repo}"
       NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-      git push origin "feat/${slug}-mvp" 2>/dev/null || true
       gh pr ready 2>/dev/null || true
       STATE="docs/.pipeline/state.json"
       TMP=$(mktemp) && jq --arg now "$NOW" '.current_phase="done" | .phases.release.status="completed" | .phases.release.completed_at=$now' "$STATE" > "$TMP" && mv "$TMP" "$STATE"
       jq -n --arg now "$NOW" '{id:"05-release",from_phase:"release",to_phase:"done",artifact:"docs/release-notes.md",summary:"Released",created_at:$now}' > "docs/.pipeline/handoffs/05-release.json"
-      git add -A && git commit -q -m "chore(${slug}): pipeline complete" 2>/dev/null || true
+      git add docs/.pipeline/ docs/release-notes.md && git commit -q -m "chore(${slug}): pipeline complete" 2>/dev/null || true
       git push origin "feat/${slug}-mvp" 2>/dev/null || true
       PR_URL=$(gh pr view --json url -q '.url' 2>/dev/null || echo "no PR")
       echo "{\"status\":\"complete\",\"pr\":\"$PR_URL\"}"
