@@ -1,4 +1,4 @@
-name: product-development
+name: product-development-auto
 args:
   slug:
     description: "Project slug (lowercase-hyphenated)"
@@ -11,8 +11,7 @@ args:
 steps:
   - id: init
     run: |
-      SLUG="${slug}"
-      REPO="${repo}"
+      SLUG="${slug}" REPO="${repo}"
       TOKEN=$(grep DISCORD_BOT_TOKEN /Users/zephyr/Desktop/lab/deep-research/ai-pipeline/.env 2>/dev/null | cut -d= -f2)
       API="https://discord.com/api/v10"
       ct() { curl -sf -X POST "$API/channels/$1/threads" -H "Authorization: Bot $TOKEN" -H "Content-Type: application/json" -d "{\"name\":\"$2\",\"type\":11,\"auto_archive_duration\":10080}" | jq -r '.id // empty'; }
@@ -31,17 +30,25 @@ steps:
       cd "$REPO" && git add docs/.pipeline/ && git commit -q -m "chore($SLUG): init pipeline" 2>/dev/null || true
       echo "initialized"
 
+  - id: notify_design_start
+    run: |
+      openclaw message send --channel discord --target "channel:${product_thread}" --message "⏳ **[1/4] Architect 正在做技术设计...**" 2>/dev/null || true
+
   - id: design
     run: |
       DT=$(jq -r '.threads.design' "${repo}/docs/.pipeline/state.json")
       MSG="Project [${slug}]. Read ${repo}/docs/prd.md, write tech design to ${repo}/docs/tech-design.md and task breakdown to ${repo}/docs/tasks.md. Git commit in ${repo}. Reply with markdown summary in Chinese."
       openclaw agent -m "$MSG" --agent p-architect --deliver --channel discord --to "$DT" --json
 
+  - id: notify_dev_start
+    run: |
+      openclaw message send --channel discord --target "channel:${product_thread}" --message "✅ 技术设计完成 → #design
+⏳ **[2/4] Developer 正在写代码...**" 2>/dev/null || true
+
   - id: create_branch
     run: |
       cd "${repo}" && git checkout -b "feat/${slug}-mvp" 2>/dev/null || git checkout "feat/${slug}-mvp"
       git push -u origin "feat/${slug}-mvp" 2>/dev/null || true
-      echo "branch: feat/${slug}-mvp"
 
   - id: development
     run: |
@@ -54,11 +61,21 @@ steps:
       cd "${repo}" && git push origin "feat/${slug}-mvp" 2>/dev/null || true
       gh pr create --base main --head "feat/${slug}-mvp" --title "feat(${slug}): MVP" --body "PRD: docs/prd.md | Design: docs/tech-design.md" --draft 2>/dev/null || echo "PR exists"
 
+  - id: notify_review_start
+    run: |
+      openclaw message send --channel discord --target "channel:${product_thread}" --message "✅ 开发完成 → #dev
+⏳ **[3/4] Reviewer 正在审查代码...**" 2>/dev/null || true
+
   - id: review
     run: |
       VT=$(jq -r '.threads.dev' "${repo}/docs/.pipeline/state.json")
       MSG="Project [${slug}], repo ${repo}. Review recent code changes. Check quality, security, tests. Reply in Chinese."
       openclaw agent -m "$MSG" --agent p-reviewer --deliver --channel discord --to "$VT" --json
+
+  - id: notify_test_start
+    run: |
+      openclaw message send --channel discord --target "channel:${product_thread}" --message "✅ 代码审查通过 → #dev
+⏳ **[4/4] QA 正在跑测试...**" 2>/dev/null || true
 
   - id: testing
     run: |
@@ -79,4 +96,10 @@ steps:
       git add docs/ && git commit -q -m "chore(${slug}): pipeline complete" 2>/dev/null || true
       git push origin "feat/${slug}-mvp" 2>/dev/null || true
       PR_URL=$(gh pr view --json url -q '.url' 2>/dev/null || echo "no PR")
+      openclaw message send --channel discord --target "channel:${product_thread}" --message "🎉 **流水线完成！**
+- #design → 技术方案
+- #dev → 代码 + 审查
+- #qa → 测试报告
+- #release → 发布说明
+- PR: $PR_URL" 2>/dev/null || true
       echo "{\"status\":\"complete\",\"pr\":\"$PR_URL\"}"

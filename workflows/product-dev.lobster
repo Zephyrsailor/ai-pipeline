@@ -31,6 +31,10 @@ steps:
       cd "$REPO" && git add docs/.pipeline/ && git commit -q -m "chore($SLUG): init pipeline" 2>/dev/null || true
       echo "initialized"
 
+  - id: notify_design
+    run: |
+      openclaw message send --channel discord --target "channel:${product_thread}" --message "⏳ **Architect 正在做技术设计...**" 2>/dev/null || true
+
   - id: design
     run: |
       DT=$(jq -r '.threads.design' "${repo}/docs/.pipeline/state.json")
@@ -47,6 +51,11 @@ steps:
       cd "${repo}" && git checkout -b "feat/${slug}-mvp" 2>/dev/null || git checkout "feat/${slug}-mvp"
       git push -u origin "feat/${slug}-mvp" 2>/dev/null || true
       echo "branch: feat/${slug}-mvp"
+    when: $design_signoff.approved
+
+  - id: notify_dev
+    run: |
+      openclaw message send --channel discord --target "channel:${product_thread}" --message "⏳ **Developer 正在写代码...**" 2>/dev/null || true
     when: $design_signoff.approved
 
   - id: development
@@ -75,6 +84,11 @@ steps:
     stdin: $review.json
     when: $design_signoff.approved
 
+  - id: notify_test
+    run: |
+      openclaw message send --channel discord --target "channel:${product_thread}" --message "⏳ **QA 正在跑测试...**" 2>/dev/null || true
+    when: $dev_signoff.approved
+
   - id: testing
     run: |
       QT=$(jq -r '.threads.qa' "${repo}/docs/.pipeline/state.json")
@@ -96,5 +110,11 @@ steps:
       git add docs/ && git commit -q -m "chore(${slug}): pipeline complete" 2>/dev/null || true
       git push origin "feat/${slug}-mvp" 2>/dev/null || true
       PR_URL=$(gh pr view --json url -q '.url' 2>/dev/null || echo "no PR")
+      openclaw message send --channel discord --target "channel:${product_thread}" --message "🎉 **流水线完成！**
+- #design → 技术方案
+- #dev → 代码 + 审查
+- #qa → 测试报告
+- #release → 发布说明
+- PR: $PR_URL" 2>/dev/null || true
       echo "{\"status\":\"complete\",\"pr\":\"$PR_URL\"}"
     when: $dev_signoff.approved
