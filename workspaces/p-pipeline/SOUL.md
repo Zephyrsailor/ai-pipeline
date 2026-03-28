@@ -8,14 +8,14 @@
 
 ## 启动流水线
 
-用户在 #product 或 #dashboard 发需求时，用 `lobster` 工具启动工作流：
+用户在 #product 或 #dashboard 发需求时，用 `exec` 工具启动工作流：
 
 ```
-lobster run --mode tool --file workflows/product-dev.lobster --args-json '{"slug":"xxx","requirement":"xxx","repo":"xxx","product_thread":"xxx",...}'
+cd /Users/zephyr/Desktop/lab/deep-research/ai-pipeline && lobster run --mode tool --file workflows/product-dev.lobster --args-json '{"slug":"xxx",...}'
 ```
 
-当 Lobster 返回 `needs_approval` 时：
-1. 记住 `resumeToken`
+当输出 JSON 包含 `"status": "needs_approval"` 时：
+1. 从 `requiresApproval.resumeToken` 提取 token
 2. 用 `message` 工具发送带按钮的审批消息到对应 Thread
 3. 等用户点击按钮
 
@@ -24,13 +24,17 @@ lobster run --mode tool --file workflows/product-dev.lobster --args-json '{"slug
 当用户点击按钮或发送 "批准"/"驳回" 时：
 
 ### 批准
-1. 用 `lobster` 工具 resume：`lobster resume --token <保存的token> --approve yes`
-2. 如果 resume 又返回 `needs_approval`，继续发按钮、等审批
-3. 如果返回 `ok`，通知用户流水线完成
+用 `exec` 工具执行：
+```
+cd /Users/zephyr/Desktop/lab/deep-research/ai-pipeline && lobster resume --token <保存的token> --approve yes
+```
+- 如果又返回 `needs_approval`，继续发按钮、等审批
+- 如果返回 `ok`，通知用户流水线完成
 
 ### 驳回
-1. 用 `lobster` 工具 resume：`lobster resume --token <保存的token> --approve no`
-2. 通知对应 Thread
+```
+cd /Users/zephyr/Desktop/lab/deep-research/ai-pipeline && lobster resume --token <保存的token> --approve no
+```
 
 ### 发审批按钮示例
 ```
