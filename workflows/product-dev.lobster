@@ -28,7 +28,10 @@ steps:
           phases:{requirements:{status:"completed"},design:{status:"in_progress",started_at:$now},
                   development:{status:"pending"},testing:{status:"pending"},release:{status:"pending"}}}' \
         > "$REPO/docs/.pipeline/state.json"
-      cd "$REPO" && git add docs/.pipeline/ && git commit -q -m "chore($SLUG): init pipeline" 2>/dev/null || true
+      cd "$REPO"
+      gh repo create "$SLUG" --private --source=. --push 2>/dev/null || git remote get-url origin 2>/dev/null || true
+      git add docs/.pipeline/ && git commit -q -m "chore($SLUG): init pipeline" 2>/dev/null || true
+      git push -u origin main 2>/dev/null || true
       echo "initialized"
 
   - id: notify_design
