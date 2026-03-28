@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake Mini Game</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <section class="game-wrap">
+        <canvas id="board" width="400" height="400" aria-label="snake-board"></canvas>
+      </section>
+      <aside class="panel">
+        <h1>🐍 Snake Mini</h1>
+        <p>分数：<strong id="score">0</strong></p>
+        <p>状态：<strong id="status">Ready</strong></p>
+        <button id="restart-btn" type="button">重新开始</button>
+        <p class="hint">操作：方向键移动，Space 快速重开</p>
+      </aside>
+    </main>
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
