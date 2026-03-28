@@ -71,6 +71,7 @@ steps:
   - id: create_branch
     run: |
       cd "${repo}" && git checkout -b "feat/${slug}-mvp" 2>/dev/null || git checkout "feat/${slug}-mvp"
+      git push -u origin "feat/${slug}-mvp" 2>/dev/null || true
       echo "branch: feat/${slug}-mvp"
     when: $design_signoff.approved
 
@@ -78,6 +79,13 @@ steps:
     run: |
       MSG="Project [${slug}]. Tasks: 1) Read ${repo}/docs/tech-design.md and ${repo}/docs/tasks.md 2) Implement all code in ${repo} on current branch 3) Generate ${repo}/README.md (project description, install steps, usage) 4) Commit each module: feat(${slug}): description 5) Ensure tests pass 6) Reply with summary and file list. Write in Chinese."
       openclaw agent -m "$MSG" --agent p-dev --deliver --channel discord --to ${dev_thread} --json
+    when: $design_signoff.approved
+
+  - id: push_and_pr
+    run: |
+      cd "${repo}" && git push origin "feat/${slug}-mvp" 2>/dev/null || true
+      PR_URL=$(gh pr create --base main --head "feat/${slug}-mvp" --title "[WIP] feat(${slug}): MVP implementation" --body "## Source\n- PRD: docs/prd.md\n- Tech Design: docs/tech-design.md\n- Tasks: docs/tasks.md\n\n## Status\nDraft — awaiting review and testing." --draft 2>/dev/null || echo "PR exists")
+      echo "$PR_URL"
     when: $design_signoff.approved
 
   # ── Review ──
@@ -114,10 +122,15 @@ steps:
       openclaw agent -m "$MSG" --agent p-release --deliver --channel discord --to ${release_thread} --json
     when: $release_signoff.approved
 
-  - id: release_done
+  - id: finalize
     run: |
-      STATE="${repo}/docs/.pipeline-state.json"
+      cd "${repo}"
+      git push origin "feat/${slug}-mvp" 2>/dev/null || true
+      gh pr ready 2>/dev/null || true
+      STATE="docs/.pipeline-state.json"
       TMP=$(mktemp) && jq --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '.current_phase="done" | .phases.release.status="completed" | .phases.release.completed_at=$now' "$STATE" > "$TMP" && mv "$TMP" "$STATE"
-      cd "${repo}" && git add docs/.pipeline-state.json && git commit -q -m "chore(${slug}): pipeline complete" 2>/dev/null || true
-      cat "$STATE"
+      git add -A && git commit -q -m "chore(${slug}): pipeline complete" 2>/dev/null || true
+      git push origin "feat/${slug}-mvp" 2>/dev/null || true
+      PR_URL=$(gh pr view --json url -q '.url' 2>/dev/null || echo "no PR")
+      echo "{\"status\":\"complete\",\"pr\":\"$PR_URL\"}"
     when: $release_signoff.approved
