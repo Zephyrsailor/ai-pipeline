@@ -44,6 +44,11 @@ steps:
       jq -n --arg now "$NOW" '{id:"01-requirements",from_phase:"requirements",to_phase:"design",artifact:"docs/prd.md",summary:"PRD completed",created_at:$now}' > "${repo}/docs/.pipeline/handoffs/01-requirements.json"
       echo "phase: design"
 
+  - id: prd_notify
+    run: |
+      openclaw message send --channel discord --target "channel:${product_thread}" --message "📋 **[${slug}] PRD 已完成**" --components '{"text":"PRD 已写入 docs/prd.md，请审阅后在 #dashboard 批准。","blocks":[{"type":"actions","buttons":[{"label":"✅ 批准 PRD","style":"success"},{"label":"❌ 驳回","style":"danger"}]}]}' 2>/dev/null || true
+      echo "approval requested"
+
   - id: prd_signoff
     approval:
       prompt: "PRD written to ${repo}/docs/prd.md. Review and approve."
@@ -63,6 +68,12 @@ steps:
       TMP=$(mktemp) && jq --arg now "$NOW" '.current_phase="development" | .phases.design.status="completed" | .phases.design.completed_at=$now | .phases.development.status="in_progress" | .phases.development.started_at=$now' "$STATE" > "$TMP" && mv "$TMP" "$STATE"
       jq -n --arg now "$NOW" '{id:"02-design",from_phase:"design",to_phase:"development",artifact:"docs/tech-design.md",summary:"Technical design and task breakdown completed",created_at:$now}' > "${repo}/docs/.pipeline/handoffs/02-design.json"
       echo "phase: development"
+    when: $prd_signoff.approved
+
+  - id: design_notify
+    run: |
+      openclaw message send --channel discord --target "channel:${design_thread}" --message "🏗️ **[${slug}] 技术设计已完成**" --components '{"text":"tech-design.md 和 tasks.md 已写入，请审阅。","blocks":[{"type":"actions","buttons":[{"label":"✅ 批准设计","style":"success"},{"label":"❌ 驳回","style":"danger"}]}]}' 2>/dev/null || true
+      echo "approval requested"
     when: $prd_signoff.approved
 
   - id: design_signoff
@@ -114,6 +125,12 @@ steps:
       jq -n --arg now "$NOW" '{id:"03-development",from_phase:"development",to_phase:"testing",artifact:"src/",summary:"Implementation completed",created_at:$now}' > "${repo}/docs/.pipeline/handoffs/03-development.json"
       jq -n --arg now "$NOW" '{id:"04-testing",from_phase:"testing",to_phase:"release",artifact:"docs/test-report.md",summary:"Tests passed",created_at:$now}' > "${repo}/docs/.pipeline/handoffs/04-testing.json"
       echo "phase: release"
+    when: $design_signoff.approved
+
+  - id: release_notify
+    run: |
+      openclaw message send --channel discord --target "channel:${dev_thread}" --message "🚀 **[${slug}] 开发测试完成**" --components '{"text":"代码审查和测试已通过，确认发布？","blocks":[{"type":"actions","buttons":[{"label":"✅ 批准发布","style":"success"},{"label":"❌ 驳回","style":"danger"}]}]}' 2>/dev/null || true
+      echo "approval requested"
     when: $design_signoff.approved
 
   - id: release_signoff

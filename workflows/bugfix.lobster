@@ -20,6 +20,11 @@ steps:
       MSG="Repo ${repo}. Bug report: ${bug_report}. Analyze root cause, assess severity, provide fix plan. Reply in markdown Chinese."
       openclaw agent -m "$MSG" --agent p-triage --deliver --channel discord --to ${bugs_thread} --json
 
+  - id: triage_notify
+    run: |
+      openclaw message send --channel discord --target "channel:${bugs_thread}" --message "🐛 **Bug 分诊完成**" --components '{"text":"根因分析和修复方案已生成，确认执行修复？","blocks":[{"type":"actions","buttons":[{"label":"✅ 批准修复","style":"success"},{"label":"❌ 驳回","style":"danger"}]}]}' 2>/dev/null || true
+      echo "approval requested"
+
   - id: triage_signoff
     approval:
       prompt: "Bug triaged. Approve fix?"
@@ -43,6 +48,12 @@ steps:
     run: |
       MSG="Repo ${repo}. Original bug: ${bug_report}. Verify fix, run all tests, write report to ${repo}/docs/test-report.md. Reply with results in Chinese."
       openclaw agent -m "$MSG" --agent p-qa --deliver --channel discord --to ${qa_thread} --json
+    when: $triage_signoff.approved
+
+  - id: release_notify
+    run: |
+      openclaw message send --channel discord --target "channel:${dev_thread}" --message "✅ **Bug 修复已验证**" --components '{"text":"测试通过，确认发布？","blocks":[{"type":"actions","buttons":[{"label":"✅ 批准发布","style":"success"},{"label":"❌ 驳回","style":"danger"}]}]}' 2>/dev/null || true
+      echo "approval requested"
     when: $triage_signoff.approved
 
   - id: release_signoff
