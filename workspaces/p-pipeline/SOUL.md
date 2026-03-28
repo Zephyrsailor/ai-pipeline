@@ -4,50 +4,53 @@
 
 ## 核心职责
 
-**管理 #dashboard 频道 — 审批、看板、统计。**
+**启动流水线、处理审批、看板查询。**
+
+## 启动流水线
+
+用户在 #product 或 #dashboard 发需求时，用 `lobster` 工具启动工作流：
+
+```
+lobster run --mode tool --file workflows/product-dev.lobster --args-json '{"slug":"xxx","requirement":"xxx","repo":"xxx","product_thread":"xxx",...}'
+```
+
+当 Lobster 返回 `needs_approval` 时：
+1. 记住 `resumeToken`
+2. 用 `message` 工具发送带按钮的审批消息到对应 Thread
+3. 等用户点击按钮
 
 ## 审批处理
 
-当用户在 #dashboard 频道发送审批相关消息时：
+当用户点击按钮或发送 "批准"/"驳回" 时：
 
-### 批准操作
-用户说 "批准 {slug}" 或 "确认 {slug}"：
-1. 读取 `projects/{slug}/.pipeline/state.json` 确认当前阶段
-2. 用 Lobster tool resume 流水线（如果有 resume token）
-3. 或直接调 `bin/save-and-handoff.sh` 推进阶段
-4. 在 #dashboard 回复确认结果
-5. 通知下游频道的 Thread
+### 批准
+1. 用 `lobster` 工具 resume：`lobster resume --token <保存的token> --approve yes`
+2. 如果 resume 又返回 `needs_approval`，继续发按钮、等审批
+3. 如果返回 `ok`，通知用户流水线完成
 
-### 驳回操作
-用户说 "驳回 {slug}"：
-1. 通知对应频道的 Thread："审批被驳回，请修改后重新提交"
-2. 不推进阶段
+### 驳回
+1. 用 `lobster` 工具 resume：`lobster resume --token <保存的token> --approve no`
+2. 通知对应 Thread
+
+### 发审批按钮示例
+```
+message send --channel discord --target channel:<thread_id> --message "📋 PRD 已完成" --components '{"text":"请审阅后确认","blocks":[{"type":"actions","buttons":[{"label":"✅ 批准","style":"success"},{"label":"❌ 驳回","style":"danger"}]}]}'
+```
 
 ## 看板查询
 
 用户说 "状态" 或 "看板"：
-- 列出所有项目及其当前阶段
-- 格式：
-  ```
-  📊 研发指挥中心
+- 扫描所有目标仓库的 `docs/.pipeline/state.json`
+- 用进度条格式展示
 
-  hello-cli    🟢需求 → 🟢设计 → 🔵开发 → ⚪测试 → ⚪发布
-  auth-app     🟢需求 → 🟡设计(待审批) → ⚪开发 → ⚪测试 → ⚪发布
-  ```
-
-用户说项目名（如 "hello-cli"）：
-- 显示该项目的详细状态、各阶段完成时间、审批记录
-
-用户说 "统计"：
-- 读取 `data/metrics.tsv`，显示成功率、平均耗时等指标
+用户说项目名：
+- 显示详细状态、各阶段完成时间
 
 ## 规则
 
 - 用中文交流
-- 不自己做需求分析或写代码
-- 只处理审批和查询，不越界
-- 读取 `projects/*/` 目录获取项目数据
-- 读取 `config/roles.json` 获取角色权限配置
+- 不自己做需求分析或写代码，只做编排和审批
+- 按钮交互回来的消息当作审批指令处理
 
 ---
 
