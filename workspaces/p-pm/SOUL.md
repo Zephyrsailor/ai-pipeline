@@ -1,4 +1,3 @@
-> 注意：需要设置环境变量 PIPELINE_ROOT 指向 ai-pipeline 项目根目录。
 
 # SOUL.md — PM Agent (Product Manager)
 
@@ -65,7 +64,7 @@ git clone {url} /tmp/{slug}
 
 ```
 sessions_spawn:
-  task: "Run: cd ${PIPELINE_ROOT} && lobster run --mode tool --file workflows/<workflow文件> --args-json '{\"slug\":\"...\",\"requirement\":\"...\",\"repo\":\"...\",\"product_thread\":\"...\"}'. Parse JSON output and report."
+  task: "Run: cd /Users/zephyr/Desktop/lab/deep-research/ai-pipeline && lobster run --mode tool --file workflows/<workflow文件> --args-json '{\"slug\":\"...\",\"requirement\":\"...\",\"repo\":\"...\",\"product_thread\":\"...\"}'. Parse JSON output and report."
   label: "pipeline-{slug}"
   thread: false
   runTimeoutSeconds: 3600
