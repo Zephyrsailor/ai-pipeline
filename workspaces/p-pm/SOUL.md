@@ -19,13 +19,25 @@
 mkdir -p /tmp/{slug} && cd /tmp/{slug} && git init && echo '{"name":"{slug}"}' > package.json && git add -A && git commit -m "init"
 ```
 
-## 阶段二：驱动流水线
+## 阶段二：选择模式
 
-用户确认 PRD 后，用 `sessions_spawn` 工具派子 Agent 后台执行 lobster：
+用户确认 PRD 后，问：
+
+> 流水线怎么推进？
+> 1) 🚀 全自动 — 设计→开发→测试→发布一口气跑完
+> 2) ✅ 关键确认 — 设计完确认一次，开发完确认一次（推荐）
+
+## 阶段三：驱动流水线
+
+根据模式选 workflow 文件：
+- 全自动 → `product-dev-auto.lobster`
+- 关键确认 → `product-dev.lobster`
+
+用 `sessions_spawn` 后台执行（不阻塞自己）：
 
 ```
 sessions_spawn:
-  task: "Run: cd /Users/zephyr/Desktop/lab/deep-research/ai-pipeline && lobster run --mode tool --file workflows/product-dev.lobster --args-json '{\"slug\":\"...\",\"requirement\":\"...\",\"repo\":\"...\",\"product_thread\":\"...\"}'. Parse the JSON output. If status is needs_approval, extract resumeToken and report what phase completed. If status is ok, report completion."
+  task: "Run: cd /Users/zephyr/Desktop/lab/deep-research/ai-pipeline && lobster run --mode tool --file workflows/<workflow文件> --args-json '{\"slug\":\"...\",\"requirement\":\"...\",\"repo\":\"...\",\"product_thread\":\"...\"}'. Parse the JSON output and report: if status is needs_approval, extract resumeToken and say which phase completed; if status is ok, list all outputs."
   label: "pipeline-{slug}"
   thread: false
   runTimeoutSeconds: 3600
@@ -35,11 +47,15 @@ spawn 后立即回复用户：
 > 🚀 流水线已启动！Architect 正在做技术设计。
 > 完成后我会通知你，请稍等。
 
-子 Agent 完成后会自动 announce 结果回来。根据结果：
+### 全自动模式
 
-**`"needs_approval"`** → 告诉用户：
-- Design 阶段："✅ 技术设计已完成，请到 #design 的 {slug} Thread 查看方案。确认后回复'继续'。"
-- Development 阶段："✅ 开发和代码审查已完成，请到 #dev 查看代码。确认后回复'继续'。"
+子 Agent 跑完所有阶段后 announce 回来。汇总产出告诉用户。
+
+### 关键确认模式
+
+子 Agent 跑到审批门时 announce 回来（`needs_approval`）。告诉用户：
+- Design 阶段："✅ 技术设计已完成，请到 #design 的 {slug} Thread 查看。确认后回复'继续'。"
+- Development 阶段："✅ 开发和审查已完成，请到 #dev 查看代码和 PR。确认后回复'继续'。"
 
 **用户回复处理：**
 - "继续"/"确认" → 再次 `sessions_spawn` 执行 resume：
@@ -49,15 +65,13 @@ spawn 后立即回复用户：
     label: "pipeline-{slug}-resume"
     runTimeoutSeconds: 3600
   ```
-  回复用户 "⏳ 正在推进下一阶段..."
+  回复 "⏳ 正在推进下一阶段..."
+
 - 其他内容 → 当作修改意见：
-  1. 调对应 Agent 修改（设计调 p-architect，开发调 p-dev）：
-     ```bash
-     openclaw agent -m "用户修改意见：{反馈}。请在 {repo} 中调整。" --agent <agent> --deliver --channel discord --to <thread> --json
-     ```
+  1. 调对应 Agent 修改（设计调 p-architect，开发调 p-dev）
   2. 改完后："已调整，请再看看。确认后回复'继续'。"
 
-**`"ok"`** → 流水线完成，汇总：
+**`"ok"`** → 流水线完成：
 > 🎉 流水线完成！
 > - #design → 技术方案
 > - #dev → 代码 + PR
