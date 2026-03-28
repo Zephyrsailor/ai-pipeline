@@ -21,26 +21,35 @@ mkdir -p /tmp/{slug} && cd /tmp/{slug} && git init && echo '{"name":"{slug}"}' >
 
 ## 阶段二：驱动流水线
 
-用户确认 PRD 后，先回复：
-> 🚀 流水线已启动！Architect 正在做技术设计，请稍等...
+用户确认 PRD 后，用 `sessions_spawn` 工具派子 Agent 后台执行 lobster：
 
-然后用 `exec` 执行：
-```bash
-cd /Users/zephyr/Desktop/lab/deep-research/ai-pipeline && lobster run --mode tool --file workflows/product-dev.lobster --args-json '{"slug":"...","requirement":"...","repo":"...","product_thread":"..."}'
+```
+sessions_spawn:
+  task: "Run: cd /Users/zephyr/Desktop/lab/deep-research/ai-pipeline && lobster run --mode tool --file workflows/product-dev.lobster --args-json '{\"slug\":\"...\",\"requirement\":\"...\",\"repo\":\"...\",\"product_thread\":\"...\"}'. Parse the JSON output. If status is needs_approval, extract resumeToken and report what phase completed. If status is ok, report completion."
+  label: "pipeline-{slug}"
+  thread: false
+  runTimeoutSeconds: 3600
 ```
 
-exec 返回 JSON，解析 `status`：
+spawn 后立即回复用户：
+> 🚀 流水线已启动！Architect 正在做技术设计。
+> 完成后我会通知你，请稍等。
 
-**`"needs_approval"`** → 提取 `requiresApproval.resumeToken`，告诉用户：
-- 如果 prompt 包含 "Design" → "✅ 技术设计已完成，请到 #design 的 {slug} Thread 查看方案。确认后回复'继续'。"
-- 如果 prompt 包含 "Development" → "✅ 开发和代码审查已完成，请到 #dev 查看代码。确认后回复'继续'。"
+子 Agent 完成后会自动 announce 结果回来。根据结果：
+
+**`"needs_approval"`** → 告诉用户：
+- Design 阶段："✅ 技术设计已完成，请到 #design 的 {slug} Thread 查看方案。确认后回复'继续'。"
+- Development 阶段："✅ 开发和代码审查已完成，请到 #dev 查看代码。确认后回复'继续'。"
 
 **用户回复处理：**
-- "继续"/"确认"/"OK" → 先回复"⏳ 正在推进下一阶段..."，然后 `exec`：
-  ```bash
-  cd /Users/zephyr/Desktop/lab/deep-research/ai-pipeline && lobster resume --token <token> --approve yes
+- "继续"/"确认" → 再次 `sessions_spawn` 执行 resume：
   ```
-  再次解析返回的 JSON，重复上面的逻辑。
+  sessions_spawn:
+    task: "Run: cd /Users/zephyr/Desktop/lab/deep-research/ai-pipeline && lobster resume --token <token> --approve yes. Parse JSON output and report."
+    label: "pipeline-{slug}-resume"
+    runTimeoutSeconds: 3600
+  ```
+  回复用户 "⏳ 正在推进下一阶段..."
 - 其他内容 → 当作修改意见：
   1. 调对应 Agent 修改（设计调 p-architect，开发调 p-dev）：
      ```bash
