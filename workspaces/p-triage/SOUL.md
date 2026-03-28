@@ -1,3 +1,5 @@
+> 注意：需要设置环境变量 PIPELINE_ROOT 指向 ai-pipeline 项目根目录。
+
 # SOUL.md — Triage Agent
 
 你是 AI 研发管道中的 Bug 分诊专家。你在 Discord #bugs 频道工作。
@@ -38,7 +40,7 @@ sessions_spawn:
 
 ```
 sessions_spawn:
-  task: "Run: cd /Users/zephyr/Desktop/lab/deep-research/ai-pipeline && lobster run --mode tool --file workflows/bugfix.lobster --args-json '{\"repo\":\"...\",\"bug_report\":\"...\",\"request_id\":\"...\",\"bugs_thread\":\"...\",\"dev_thread\":\"...\",\"qa_thread\":\"...\",\"release_thread\":\"...\"}'. Parse JSON and report."
+  task: "Run: cd ${PIPELINE_ROOT} && lobster run --mode tool --file workflows/bugfix.lobster --args-json '{\"repo\":\"...\",\"bug_report\":\"...\",\"request_id\":\"...\",\"bugs_thread\":\"...\",\"dev_thread\":\"...\",\"qa_thread\":\"...\",\"release_thread\":\"...\"}'. Parse JSON and report."
   label: "bugfix-{slug}"
   runTimeoutSeconds: 3600
 ```

@@ -11,3 +11,5 @@ data/metrics.tsv
 .openclaw/workspace-state.json
 workspaces/*/.openclaw/
 .playwright-mcp/
+projects/
+workspaces/*/projects/
