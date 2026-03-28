@@ -19,55 +19,41 @@
 mkdir -p /tmp/{slug} && cd /tmp/{slug} && git init && echo '{"name":"{slug}"}' > package.json && git add -A && git commit -m "init"
 ```
 
-## 阶段二：选择模式
+## 阶段二：驱动流水线
 
-用户确认 PRD 后，问：
-
-> 流水线怎么推进？
-> 1) 🚀 全自动 — 一口气跑完
-> 2) ✅ 关键确认 — 设计完确认一次，开发完确认一次（推荐）
-
-## 阶段三：驱动流水线
-
-根据模式选 workflow：
-- 全自动 → `product-dev-auto.lobster`
-- 关键确认 → `product-dev.lobster`
-
-**重要：在调 exec 之前，先用 message 工具回复用户：**
-> 🚀 流水线已启动（{模式}模式）！
-> 各阶段产出会自动发到 #design / #dev / #qa / #release 的 {slug} Thread。
-> 请稍等几分钟...
+用户确认 PRD 后，先回复：
+> 🚀 流水线已启动！Architect 正在做技术设计，请稍等...
 
 然后用 `exec` 执行：
 ```bash
-cd /Users/zephyr/Desktop/lab/deep-research/ai-pipeline && lobster run --mode tool --file workflows/<workflow> --args-json '{"slug":"...","requirement":"...","repo":"...","product_thread":"..."}'
+cd /Users/zephyr/Desktop/lab/deep-research/ai-pipeline && lobster run --mode tool --file workflows/product-dev.lobster --args-json '{"slug":"...","requirement":"...","repo":"...","product_thread":"..."}'
 ```
 
-### 全自动模式
-一次 exec 跑完。完成后告诉用户产出汇总和各频道 Thread 链接。
-
-### 关键确认模式
 exec 返回 JSON，解析 `status`：
 
 **`"needs_approval"`** → 提取 `requiresApproval.resumeToken`，告诉用户：
-- Design 阶段："✅ 技术设计已完成，请到 #design 的 {slug} Thread 查看。确认后回复'继续'。"
-- Development 阶段："✅ 开发和审查已完成，请到 #dev 查看代码和 PR。确认后回复'继续'。"
+- 如果 prompt 包含 "Design" → "✅ 技术设计已完成，请到 #design 的 {slug} Thread 查看方案。确认后回复'继续'。"
+- 如果 prompt 包含 "Development" → "✅ 开发和代码审查已完成，请到 #dev 查看代码。确认后回复'继续'。"
 
 **用户回复处理：**
-- 用户说"继续"/"确认"/"OK" → 用 `exec` 执行 resume：
+- "继续"/"确认"/"OK" → 先回复"⏳ 正在推进下一阶段..."，然后 `exec`：
   ```bash
   cd /Users/zephyr/Desktop/lab/deep-research/ai-pipeline && lobster resume --token <token> --approve yes
   ```
-- 用户给出修改意见（任何不是"继续"的内容）→ **当作反馈处理**：
-  1. 直接调对应 Agent 修改（设计阶段调 p-architect，开发阶段调 p-dev）
-  2. 把用户反馈作为 message 传给 Agent：
+  再次解析返回的 JSON，重复上面的逻辑。
+- 其他内容 → 当作修改意见：
+  1. 调对应 Agent 修改（设计调 p-architect，开发调 p-dev）：
      ```bash
-     openclaw agent -m "用户对{阶段}有修改意见：{用户的反馈}。请在 {repo} 中修改并重新提交。" --agent <对应agent> --deliver --channel discord --to <对应thread> --json
+     openclaw agent -m "用户修改意见：{反馈}。请在 {repo} 中调整。" --agent <agent> --deliver --channel discord --to <thread> --json
      ```
-  3. 修改完后再问用户："已调整，请再看看。确认后回复'继续'。"
-  4. 重复直到用户说"继续"
+  2. 改完后："已调整，请再看看。确认后回复'继续'。"
 
-**`"ok"`** → 流水线完成，汇总产出。
+**`"ok"`** → 流水线完成，汇总：
+> 🎉 流水线完成！
+> - #design → 技术方案
+> - #dev → 代码 + PR
+> - #qa → 测试报告
+> - #release → 发布说明
 
 ## 绝对不要做的事
 
