@@ -20,8 +20,8 @@ steps:
   # ── Init ──
   - id: init
     run: |
-      mkdir -p "${repo}/docs" "${repo}/src" "${repo}/tests"
-      STATE="${repo}/docs/.pipeline-state.json"
+      mkdir -p "${repo}/docs/.pipeline/handoffs" "${repo}/src" "${repo}/tests"
+      STATE="${repo}/docs/.pipeline/state.json"
       jq -n --arg slug "${slug}" --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
         '{project:$slug, created_at:$now, current_phase:"requirements",
           phases:{requirements:{status:"in_progress",started_at:$now},
@@ -38,8 +38,10 @@ steps:
 
   - id: requirements_done
     run: |
-      STATE="${repo}/docs/.pipeline-state.json"
-      TMP=$(mktemp) && jq --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '.current_phase="design" | .phases.requirements.status="completed" | .phases.requirements.completed_at=$now | .phases.design.status="in_progress" | .phases.design.started_at=$now' "$STATE" > "$TMP" && mv "$TMP" "$STATE"
+      NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+      STATE="${repo}/docs/.pipeline/state.json"
+      TMP=$(mktemp) && jq --arg now "$NOW" '.current_phase="design" | .phases.requirements.status="completed" | .phases.requirements.completed_at=$now | .phases.design.status="in_progress" | .phases.design.started_at=$now' "$STATE" > "$TMP" && mv "$TMP" "$STATE"
+      jq -n --arg now "$NOW" '{id:"01-requirements",from_phase:"requirements",to_phase:"design",artifact:"docs/prd.md",summary:"PRD completed",created_at:$now}' > "${repo}/docs/.pipeline/handoffs/01-requirements.json"
       echo "phase: design"
 
   - id: prd_signoff
@@ -56,8 +58,10 @@ steps:
 
   - id: design_done
     run: |
-      STATE="${repo}/docs/.pipeline-state.json"
-      TMP=$(mktemp) && jq --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '.current_phase="development" | .phases.design.status="completed" | .phases.design.completed_at=$now | .phases.development.status="in_progress" | .phases.development.started_at=$now' "$STATE" > "$TMP" && mv "$TMP" "$STATE"
+      NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+      STATE="${repo}/docs/.pipeline/state.json"
+      TMP=$(mktemp) && jq --arg now "$NOW" '.current_phase="development" | .phases.design.status="completed" | .phases.design.completed_at=$now | .phases.development.status="in_progress" | .phases.development.started_at=$now' "$STATE" > "$TMP" && mv "$TMP" "$STATE"
+      jq -n --arg now "$NOW" '{id:"02-design",from_phase:"design",to_phase:"development",artifact:"docs/tech-design.md",summary:"Technical design and task breakdown completed",created_at:$now}' > "${repo}/docs/.pipeline/handoffs/02-design.json"
       echo "phase: development"
     when: $prd_signoff.approved
 
@@ -104,8 +108,11 @@ steps:
 
   - id: testing_done
     run: |
-      STATE="${repo}/docs/.pipeline-state.json"
-      TMP=$(mktemp) && jq --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '.current_phase="release" | .phases.development.status="completed" | .phases.development.completed_at=$now | .phases.testing.status="completed" | .phases.testing.completed_at=$now | .phases.release.status="in_progress" | .phases.release.started_at=$now' "$STATE" > "$TMP" && mv "$TMP" "$STATE"
+      NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+      STATE="${repo}/docs/.pipeline/state.json"
+      TMP=$(mktemp) && jq --arg now "$NOW" '.current_phase="release" | .phases.development.status="completed" | .phases.development.completed_at=$now | .phases.testing.status="completed" | .phases.testing.completed_at=$now | .phases.release.status="in_progress" | .phases.release.started_at=$now' "$STATE" > "$TMP" && mv "$TMP" "$STATE"
+      jq -n --arg now "$NOW" '{id:"03-development",from_phase:"development",to_phase:"testing",artifact:"src/",summary:"Implementation completed",created_at:$now}' > "${repo}/docs/.pipeline/handoffs/03-development.json"
+      jq -n --arg now "$NOW" '{id:"04-testing",from_phase:"testing",to_phase:"release",artifact:"docs/test-report.md",summary:"Tests passed",created_at:$now}' > "${repo}/docs/.pipeline/handoffs/04-testing.json"
       echo "phase: release"
     when: $design_signoff.approved
 
@@ -125,10 +132,12 @@ steps:
   - id: finalize
     run: |
       cd "${repo}"
+      NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
       git push origin "feat/${slug}-mvp" 2>/dev/null || true
       gh pr ready 2>/dev/null || true
-      STATE="docs/.pipeline-state.json"
-      TMP=$(mktemp) && jq --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '.current_phase="done" | .phases.release.status="completed" | .phases.release.completed_at=$now' "$STATE" > "$TMP" && mv "$TMP" "$STATE"
+      STATE="docs/.pipeline/state.json"
+      TMP=$(mktemp) && jq --arg now "$NOW" '.current_phase="done" | .phases.release.status="completed" | .phases.release.completed_at=$now' "$STATE" > "$TMP" && mv "$TMP" "$STATE"
+      jq -n --arg now "$NOW" '{id:"05-release",from_phase:"release",to_phase:"done",artifact:"docs/release-notes.md",summary:"Released",created_at:$now}' > "docs/.pipeline/handoffs/05-release.json"
       git add -A && git commit -q -m "chore(${slug}): pipeline complete" 2>/dev/null || true
       git push origin "feat/${slug}-mvp" 2>/dev/null || true
       PR_URL=$(gh pr view --json url -q '.url' 2>/dev/null || echo "no PR")
