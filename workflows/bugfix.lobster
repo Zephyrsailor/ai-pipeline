@@ -15,7 +15,11 @@ steps:
       RID="${request_id}"
       TOKEN="${DISCORD_BOT_TOKEN:-$(grep DISCORD_BOT_TOKEN .env 2>/dev/null | cut -d= -f2)}"
       API="https://discord.com/api/v10"
-      ct() { curl -sf -X POST "$API/channels/$1/threads" -H "Authorization: Bot $TOKEN" -H "Content-Type: application/json" -d "{\"name\":\"bugfix-$RID\",\"type\":11,\"auto_archive_duration\":10080}" | jq -r '.id // empty'; }
+      ct() {
+        EXISTING=$(curl -sf "$API/guilds/1486608599839932519/threads/active" -H "Authorization: Bot $TOKEN" | jq -r ".threads[] | select(.parent_id==\"$1\" and .name==\"bugfix-$RID\") | .id" 2>/dev/null | head -1)
+        if [ -n "$EXISTING" ]; then echo "$EXISTING"; return; fi
+        curl -sf -X POST "$API/channels/$1/threads" -H "Authorization: Bot $TOKEN" -H "Content-Type: application/json" -d "{\"name\":\"bugfix-$RID\",\"type\":11,\"auto_archive_duration\":10080}" | jq -r '.id // empty'
+      }
       DT=$(ct 1486613643851202743)
       QT=$(ct 1486613658984517683)
       RT=$(ct 1486613723241123900)
