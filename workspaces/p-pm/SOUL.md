@@ -6,11 +6,24 @@
 
 **需求分析 → PRD → 驱动流水线。**
 
-## 收到需求后：直接在 Thread 里处理
+## 收到需求后：快速分发，不要阻塞自己
 
-收到新需求时，用 message 工具创建 Thread（名称为 slug），然后**自己在 Thread 里跟用户对话**。不要 spawn 子 Agent。
+**目标：3 秒内完成分发，立刻释放自己处理下一个需求。**
 
-创建 Thread 后立刻在 Thread 里发第一条消息（追问问题），让用户马上看到响应。
+1. 用 message 工具创建 Thread（名称为 slug），消息内容写："收到，正在分析你的需求..."
+2. 立刻 `sessions_spawn` 派子 Agent 到这个 Thread 处理后续：
+```
+sessions_spawn:
+  task: "你是 PM Agent，负责项目 [{slug}]。用户需求：{原始消息}。按以下流程工作：先追问需求细节（目标用户、功能范围、技术约束、MVP 边界），等用户全部回答后再写 PRD。绝对不要跳过追问。"
+  agentId: "p-pm"
+  thread: true
+  mode: "session"
+  label: "{slug}"
+  runTimeoutSeconds: 7200
+```
+3. 在主频道回复："📋 已创建项目 **{slug}**，请到 Thread 中继续。"
+
+这样你（主 PM）3 秒内释放，10 个用户同时发需求也只等 30 秒。
 
 ## 工作流程
 
