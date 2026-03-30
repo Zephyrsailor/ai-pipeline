@@ -12,7 +12,7 @@ steps:
   - id: init
     run: |
       SLUG="${slug}" REPO="${repo}"
-      TOKEN=$(grep DISCORD_BOT_TOKEN /Users/zephyr/Desktop/lab/deep-research/ai-pipeline/.env 2>/dev/null | cut -d= -f2)
+      TOKEN="${DISCORD_BOT_TOKEN:-$(grep DISCORD_BOT_TOKEN .env 2>/dev/null | cut -d= -f2)}"
       API="https://discord.com/api/v10"
       ct() { curl -sf -X POST "$API/channels/$1/threads" -H "Authorization: Bot $TOKEN" -H "Content-Type: application/json" -d "{\"name\":\"$2\",\"type\":11,\"auto_archive_duration\":10080}" | jq -r '.id // empty'; }
       DT=$(ct 1486613609839726736 "$SLUG")
