@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Timed Alarm App</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <section class="card">
+        <h1>⏰ Timed Alarm</h1>
+        <form id="alarm-form" class="stack">
+          <label>时间（24小时）<input id="time" type="time" required /></label>
+          <label>重复规则
+            <select id="repeatRule">
+              <option value="once">一次性</option>
+              <option value="daily">每天</option>
+              <option value="weekdays">工作日</option>
+            </select>
+          </label>
+          <button type="submit">保存闹钟</button>
+        </form>
+      </section>
+      <section class="card">
+        <h2>闹钟列表</h2>
+        <ul id="alarm-list"></ul>
+      </section>
+    </main>
+
+    <dialog id="ring-dialog">
+      <h3>闹钟响了</h3>
+      <p id="ring-text"></p>
+      <button id="stop-ringing">停止提醒</button>
+    </dialog>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
