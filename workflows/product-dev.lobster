@@ -113,15 +113,6 @@ steps:
       git add docs/ && git commit -q -m "chore(${slug}): pipeline complete" 2>/dev/null || true
       git push origin "feat/${slug}-mvp" 2>/dev/null || true
       PR_URL=$(gh pr view --json url -q '.url' 2>/dev/null || echo "no PR")
-      FINAL_MSG=$(cat <<EOF
-🎉 **流水线完成！**
-- #design → 技术方案
-- #dev → 代码 + 审查
-- #qa → 测试报告
-- #release → 发布说明
-- PR: $PR_URL
-EOF
-)
-      openclaw message send --channel discord --target "channel:${product_thread}" --message "$FINAL_MSG" 2>/dev/null || true
+      openclaw message send --channel discord --target "channel:${product_thread}" --message "🎉 流水线完成！#design→技术方案 #dev→代码+审查 #qa→测试报告 #release→发布说明 PR: $PR_URL" 2>/dev/null || true
       echo "{\"status\":\"complete\",\"pr\":\"$PR_URL\"}"
     when: $dev_signoff.approved
