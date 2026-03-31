@@ -100,7 +100,7 @@ requirements → design → development → testing → release
 
 | 时机 | 操作 | 由谁执行 |
 |------|------|---------|
-| design 确认后 | `gh repo create {slug} --private` | Architect Agent |
+| design 确认后 | `gh repo create {slug} --public` | Architect Agent |
 | 进入 dev | clone repo，创建 `feat/{slug}-mvp` 分支 | Dev Agent |
 | 开始写代码 | 在分支上开发，开 Draft PR | Dev Agent |
 | 代码完成 | PR 标记 Ready for Review | Dev Agent |

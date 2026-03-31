@@ -33,7 +33,7 @@ steps:
                   fix:{status:"pending"},review:{status:"pending"},
                   verify:{status:"pending"},release:{status:"pending"}}}' > "$STATE"
       cd "$REPO"
-      gh repo create "bugfix-$RID" --private --source=. --push 2>/dev/null || git remote get-url origin 2>/dev/null || true
+      gh repo create "bugfix-$RID" --public --source=. --push 2>/dev/null || git remote get-url origin 2>/dev/null || true
       git add docs/.pipeline/ && git commit -q -m "chore(bugfix): init pipeline $RID" 2>/dev/null || true
       git push -u origin main 2>/dev/null || true
       echo "initialized"
@@ -141,7 +141,8 @@ steps:
       STATE="${repo}/docs/.pipeline/state.json"
       TMP=$(mktemp) && jq --arg now "$NOW" '.current_phase="done" | .phases.release.status="completed" | .phases.release.completed_at=$now' "$STATE" > "$TMP" && mv "$TMP" "$STATE"
       jq -n --arg now "$NOW" '{id:"04-release",from_phase:"release",to_phase:"done",artifact:"docs/release-notes.md",summary:"Released",created_at:$now}' > "${repo}/docs/.pipeline/handoffs/04-release.json"
-      cd "${repo}" && git add docs/.pipeline/ docs/release-notes.md && git commit -q -m "chore(bugfix): pipeline complete ${request_id}" 2>/dev/null || true
+      cd "${repo}" || exit 1
+      git add docs/.pipeline/ docs/release-notes.md && git commit -q -m "chore(bugfix): pipeline complete ${request_id}" 2>/dev/null || true
       git push origin main 2>/dev/null || true
       openclaw message send --channel discord --target "channel:${bugs_thread}" --message "🎉 **Bugfix 流水线完成！**
 - #bugs → 分诊报告
