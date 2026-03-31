@@ -32,7 +32,7 @@ steps:
                   development:{status:"pending"},testing:{status:"pending"},release:{status:"pending"}}}' \
         > "$REPO/docs/.pipeline/state.json"
       cd "$REPO"
-      gh repo create "$SLUG" --private --source=. --push 2>/dev/null || git remote get-url origin 2>/dev/null || true
+      gh repo create "$SLUG" --public --source=. --push 2>/dev/null || git remote get-url origin 2>/dev/null || true
       git add docs/.pipeline/ && git commit -q -m "chore($SLUG): init pipeline" 2>/dev/null || true
       git push -u origin main 2>/dev/null || true
       echo "initialized"
@@ -54,7 +54,8 @@ steps:
 
   - id: create_branch
     run: |
-      cd "${repo}" && git checkout -b "feat/${slug}-mvp" 2>/dev/null || git checkout "feat/${slug}-mvp"
+      cd "${repo}" || exit 1
+      git checkout -b "feat/${slug}-mvp" 2>/dev/null || git checkout "feat/${slug}-mvp"
       git push -u origin "feat/${slug}-mvp" 2>/dev/null || true
 
   - id: development
@@ -65,7 +66,8 @@ steps:
 
   - id: push_and_pr
     run: |
-      cd "${repo}" && git push origin "feat/${slug}-mvp" 2>/dev/null || true
+      cd "${repo}" || exit 1
+      git push origin "feat/${slug}-mvp" 2>/dev/null || true
       gh pr create --base main --head "feat/${slug}-mvp" --title "feat(${slug}): MVP" --body "PRD: docs/prd.md | Design: docs/tech-design.md" --draft 2>/dev/null || echo "PR exists"
 
   - id: notify_review_start
@@ -98,7 +100,7 @@ steps:
 
   - id: finalize
     run: |
-      cd "${repo}"
+      cd "${repo}" || exit 1
       gh pr ready 2>/dev/null || true
       git add docs/ && git commit -q -m "chore(${slug}): pipeline complete" 2>/dev/null || true
       git push origin "feat/${slug}-mvp" 2>/dev/null || true
